@@ -1,22 +1,8 @@
 # CellDrift
 CellDrift: temporal perturbation effects for single cell data
 
-Shifted gene programs are the key to understanding
-perturbation responses in single-cell RNA sequencing
-experiments. With the increasing complexity of
-perturbational experiments, generative models, such as
-scGen and CPA, have been used to interrogate
-perturbation latent features utilizing the power of deep
-neural networks. However, a lack of interpretability still
-prevents biologists from straightforwardly understanding
-perturbation responses. Here we present CellDrift, a
-generalized linear model (GLM) that accounts for major
-covariates, including perturbation groups, cell types, and
-their interactions in perturbational single-cell data. We
-applied Function Data Analysis (FDA) based on the
-results of GLM for perturbational studies with time series
-and identified temporal patterns of gene programs in
-perturbation responses.
+Perturbation effects on gene programs are commonly investigated in single-cell experiments. Existing models measure perturbation responses independently across time series, disregarding the temporal consistency of specific gene programs. We introduce CellDrift, a generalized linear model based functional data analysis approach to investigate temporal gene patterns in response to perturbations. 
+![Examples/overview_CellDrift.png]
 
 ### Reference
 ```
