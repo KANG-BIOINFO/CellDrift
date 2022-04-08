@@ -97,9 +97,9 @@ ct.draw_smoothing_clusters(
 )
 ```
 Visualization of several clusters (smoothing using LR method)
-#### Pattern1
+Pattern1
 <img src="../Examples/test_data/fda_celldrift/figures/LR_smoothing_0.png" alt="drawing" width="200"/>
-#### Pattern2
+Pattern2
 <img src="../Examples/test_data/fda_celldrift/figures/LR_smoothing_1.png" alt="drawing" width="200"/>
-#### Pattern3
+Pattern3
 <img src="../Examples/test_data/fda_celldrift/figures/LR_smoothing_2.png" alt="drawing" width="200"/>
