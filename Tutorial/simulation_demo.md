@@ -14,12 +14,13 @@ adata = sc.read('simulation_n_times_10_rep0.h5ad')
 adata.obs['size_factor'] = np.sum(adata.X, axis = 1) # compuate size factor
 adata.obs['batch'] = 0 # assume there's only one batch
 adata
+
+>>> AnnData object with n_obs × n_vars = 6000 × 60
+        obs: 'cell_type', 'perturb', 'time', 'batch'
+        uns: 'M', 'N', 'beta_metadata', 'n_perts', 'n_types', 'theta'
+        varm: 'beta'
 ```
->>> adata
-AnnData object with n_obs × n_vars = 6000 × 60
-    obs: 'cell_type', 'perturb', 'time', 'batch'
-    uns: 'M', 'N', 'beta_metadata', 'n_perts', 'n_types', 'theta'
-    varm: 'beta'
+
 
 2. Set up CellDrift object
 ```python
@@ -46,8 +47,8 @@ adata = ct.model_timescale(
     adjust_batch = False
 )
 os.listdir('output_celldrift')
+>>> ['time_1.0.h5ad', 'glm_predictions_time_0.33.txt', 'time_0.67.h5ad', 'glm_predictions_pairwise_comparisons_time_0.11.txt', 'glm_predictions_time_0.89.txt', 'glm_predictions_pairwise_comparisons_time_0.22.txt', 'time_0.33.h5ad', 'time_0.0.h5ad', 'glm_predictions_pairwise_comparisons_time_0.56.txt', 'glm_predictions_pairwise_comparisons_time_0.0.txt', 'glm_predictions_pairwise_comparisons_time_0.33.txt', 'glm_predictions_pairwise_comparisons_time_1.0.txt', 'glm_predictions_time_0.22.txt', 'time_0.11.h5ad', 'glm_predictions_time_0.44.txt', 'time_0.22.h5ad', 'time_0.89.h5ad', 'glm_predictions_pairwise_comparisons_time_0.44.txt', 'glm_predictions_time_1.0.txt', 'glm_predictions_time_0.11.txt', 'time_0.56.h5ad', 'glm_predictions_time_0.67.txt', 'glm_predictions_time_0.56.txt', 'glm_predictions_time_0.0.txt', 'time_0.44.h5ad', 'time_0.78.h5ad', 'glm_predictions_pairwise_comparisons_time_0.89.txt', 'glm_predictions_pairwise_comparisons_time_0.67.txt', 'glm_predictions_time_0.78.txt', 'glm_predictions_pairwise_comparisons_time_0.78.txt']
 ```
-['time_1.0.h5ad', 'glm_predictions_time_0.33.txt', 'time_0.67.h5ad', 'glm_predictions_pairwise_comparisons_time_0.11.txt', 'glm_predictions_time_0.89.txt', 'glm_predictions_pairwise_comparisons_time_0.22.txt', 'time_0.33.h5ad', 'time_0.0.h5ad', 'glm_predictions_pairwise_comparisons_time_0.56.txt', 'glm_predictions_pairwise_comparisons_time_0.0.txt', 'glm_predictions_pairwise_comparisons_time_0.33.txt', 'glm_predictions_pairwise_comparisons_time_1.0.txt', 'glm_predictions_time_0.22.txt', 'time_0.11.h5ad', 'glm_predictions_time_0.44.txt', 'time_0.22.h5ad', 'time_0.89.h5ad', 'glm_predictions_pairwise_comparisons_time_0.44.txt', 'glm_predictions_time_1.0.txt', 'glm_predictions_time_0.11.txt', 'time_0.56.h5ad', 'glm_predictions_time_0.67.txt', 'glm_predictions_time_0.56.txt', 'glm_predictions_time_0.0.txt', 'time_0.44.h5ad', 'time_0.78.h5ad', 'glm_predictions_pairwise_comparisons_time_0.89.txt', 'glm_predictions_pairwise_comparisons_time_0.67.txt', 'glm_predictions_time_0.78.txt', 'glm_predictions_pairwise_comparisons_time_0.78.txt']
 
 4. Organize the output for functional data analysis (FDA)
 ```python
@@ -69,13 +70,15 @@ fda = ct.FDA(df_zscore, df_meta)
 fd, genes = fda.create_fd_genes(genes = df_zscore.index.values, cell_type = 'Type_0', perturbation = 'Perturb_0')
 df_cluster = ct.fda_cluster(fd, genes, n_clusters = 3)
 df_cluster.head()
-```
+
+>>>
      genes  clusters_kmeans  clusters_fuzzy
 0   Gene_0                0               0
 1   Gene_1                0               0
 2  Gene_10                0               0
 3  Gene_11                0               0
 4  Gene_12                0               0
+```
 
 7. visualization for each temporal cluster
 ```python
@@ -92,8 +95,8 @@ ct.draw_smoothing_clusters(
 ```
 Visualization of several clusters (smoothing using LR method)
 Pattern1
-![pattern1](Examples/test_data/fda_celldrift/figures/LR_smoothing_0.png)
+![pattern1](../Examples/test_data/fda_celldrift/figures/LR_smoothing_0.png)
 Pattern2
-![pattern2](Examples/test_data/fda_celldrift/figures/LR_smoothing_1.png)
+![pattern2](../Examples/test_data/fda_celldrift/figures/LR_smoothing_1.png)
 Pattern3
-![pattern3](Examples/test_data/fda_celldrift/figures/LR_smoothing_2.png)
+![pattern3](../Examples/test_data/fda_celldrift/figures/LR_smoothing_2.png)
