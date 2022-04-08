@@ -27,7 +27,6 @@ pip install .
 ### Tutorial
 - [Example on a simple simulated data]()
 - [Example on COVID-19 Atlas (under construction)]()
-- [Example on Gut Differentiation (under construction)]()
 
 ### Quick Start
 ```python
@@ -36,13 +35,13 @@ import scanpy as sc
 import CellDrift as ct
 ```
 
-Load data and preparation
+#### 1. Load data and preparation
 ```python
 adata = sc.read("example.h5ad")
 adata.obs['size_factor'] = np.sum(adata.X, axis = 1)
 ```
 
-Set up CellDrift object
+#### 2. Set up CellDrift object
 ```python
 adata = ct.setup_celldrift(
     adata, 
@@ -57,7 +56,7 @@ adata = ct.setup_celldrift(
 )
 ```
 
-Run GLM model 
+#### 3. Run GLM model 
 ```python
 adata = ct.model_timescale(
     adata, 
@@ -68,12 +67,12 @@ adata = ct.model_timescale(
 )
 ```
 
-Organize the output for functional data analysis (FDA)
+#### 4. Organize the output for functional data analysis (FDA)
 ```python
 ct.organize_output(output_folder = 'output_celldrift/')
 ```
 
-set up FDA object
+#### 5. set up FDA object
 ```python
 df_zscore = pd.read_csv('fda_celldrift/pairwise_zscores_combined_.txt', sep = '\t', header = 0, index_col = 0)
 df_meta = pd.read_csv('fda_celldrift/pairwise_contrasts_metadata_.txt', sep = '\t', header = 0, index_col = 0)
@@ -81,13 +80,13 @@ df_meta = pd.read_csv('fda_celldrift/pairwise_contrasts_metadata_.txt', sep = '\
 fda = ct.FDA(df_zscore, df_meta)
 ```
 
-temporal clustering
+#### 6. temporal clustering
 ```python
 fd, genes = fda.create_fd_genes(genes = df_zscore.index.values, cell_type = 'Type_0', perturbation = 'Perturb_0')
 df_cluster = ct.fda_cluster(fd, genes, n_clusters = 3)
 ```
 
-visualization for each temporal cluster
+#### 7. visualization for each temporal cluster
 ```python
 genes = df_zscore.index.values
 ct.draw_smoothing_clusters(
