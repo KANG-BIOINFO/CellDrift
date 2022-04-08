@@ -21,31 +21,31 @@ from itertools import combinations
 logger = logging.getLogger(__name__)
 
 def extract_covar_name(idx_list, key_celltype, key_perturb):
-    """
+    '''
     Get metadata for coefficients. Four levels are included now, including
-    """
-    covar_name_describe = pd.DataFrame(index = idx_list, columns = ["level", "celltype","perturb", "x_label"])
+    '''
+    covar_name_describe = pd.DataFrame(index = idx_list, columns = ['level', 'celltype','perturb', 'x_label'])
     for i in idx_list:
-        if i == "Intercept":
-            covar_name_describe.loc[i] = ["intercept",
-                                          "",
-                                          "",
-                                          "intercept"]
+        if i == 'Intercept':
+            covar_name_describe.loc[i] = ['intercept',
+                                          '',
+                                          '',
+                                          'intercept']
         elif (key_celltype in i) and (key_perturb not in i):
-            covar_name_describe.loc[i] = ["celltype", 
-                                          i.lstrip(key_celltype + "[T.").rstrip("]"), 
-                                          "",
-                                          i.lstrip(key_celltype + "[T.").rstrip("]")]
+            covar_name_describe.loc[i] = ['celltype', 
+                                          i.lstrip(key_celltype + '[T.').rstrip(']'), 
+                                          '',
+                                          i.lstrip(key_celltype + '[T.').rstrip(']')]
         elif (key_celltype not in i) and (key_perturb in i):
-            covar_name_describe.loc[i] = ["perturb", 
-                                          "", 
-                                          i.split("T.")[1][:-1],
-                                          i.split("T.")[1][:-1]]
+            covar_name_describe.loc[i] = ['perturb', 
+                                          '', 
+                                          i.split('T.')[1][:-1],
+                                          i.split('T.')[1][:-1]]
         elif (key_celltype in i) and (key_perturb in i):
-            covar_name_describe.loc[i] = ["celltype:perturb", 
-                                          i.split(":")[0].lstrip(key_celltype + "[T.").rstrip("]"), 
-                                          i.split(":")[1].split("T.")[1][:-1],
-                                          i.split(":")[0].lstrip(key_celltype + "[T.").rstrip("]") + "-" + i.split(":")[1].split("T.")[1][:-1]]
+            covar_name_describe.loc[i] = ['celltype:perturb', 
+                                          i.split(':')[0].lstrip(key_celltype + '[T.').rstrip(']'), 
+                                          i.split(':')[1].split('T.')[1][:-1],
+                                          i.split(':')[0].lstrip(key_celltype + '[T.').rstrip(']') + '-' + i.split(':')[1].split('T.')[1][:-1]]
     return covar_name_describe
 
 
@@ -56,7 +56,7 @@ def LRT(L1, L2):
 
 
 def emmeans(df_input, betas, v, key_cell, key_perturb, ctrl):
-    """
+    '''
     Applying emmeans package in GLM model for post-hoc analysis.
     Adapt from https://glennwilliams.me/blog/2021/09/07/estimating-marginal-means-and-pairwise-tests-by-hand-in-python/
 
@@ -68,7 +68,7 @@ def emmeans(df_input, betas, v, key_cell, key_perturb, ctrl):
         inferred coefficients from the model
     v
         variance-covariance matrix of coefficients
-    """
+    '''
     # levels
     n_types = len(df_input[key_cell].cat.categories)
     n_perturbs = len(df_input[key_perturb].cat.categories)
@@ -78,29 +78,29 @@ def emmeans(df_input, betas, v, key_cell, key_perturb, ctrl):
                     list(df_input[key_perturb].cat.categories)
     )).reshape(2, n_perturbs * n_types).T
 
-    grid = pd.DataFrame(grid, columns = ["cell", "stim"]) # rename them into cell and stim purposely
+    grid = pd.DataFrame(grid, columns = ['cell', 'stim']) # rename them into cell and stim purposely
 
     # matrix
     mat = dmatrix(
-        "C(cell, Treatment(0))*C(stim, Treatment(0))", 
+        'C(cell, Treatment(0))*C(stim, Treatment(0))', 
         grid, 
-        return_type = "matrix"
+        return_type = 'matrix'
     )
 
     emmeans = grid
-    # emmeans["means"] = mat @ betas # not necessary
+    # emmeans['means'] = mat @ betas # not necessary
     
     # variance-covariance matrix
     vcov = v
     vcov = vcov[~vcov.index.str.contains('Var|Cor')]
     vcov = vcov.loc[:,~vcov.columns.str.contains('Var|Cor')]
 
-    # emmeans["SE"] = np.sqrt(np.diagonal(mat @ vcov) @ mat.T) # not necessary
+    # emmeans['SE'] = np.sqrt(np.diagonal(mat @ vcov) @ mat.T) # not necessary
 
     # making pairwise mean difference
-    combo_names = emmeans.cell + "_" + emmeans.stim
+    combo_names = emmeans.cell + '_' + emmeans.stim
     contrast_pairs = list(combinations(combo_names, 2))
-    combo_names_dummy = emmeans.cell + "," + emmeans.stim
+    combo_names_dummy = emmeans.cell + ',' + emmeans.stim
     contrast_pairs_dummy = list(combinations(combo_names_dummy, 2)) # dummy names
     
     contrast_names = []
@@ -154,7 +154,7 @@ def emmeans(df_input, betas, v, key_cell, key_perturb, ctrl):
     ]].round(4)
 
     # p value adjustment using FDR correction
-    pairwise["p_fdr"] = fdrcorrection(pvals = pairwise["p"])[1]
+    pairwise['p_fdr'] = fdrcorrection(pvals = pairwise['p'])[1]
     
     # subset
     selected_p = [i for i in np.unique(pairwise['perturbation']) if (i[0] == ctrl)]
@@ -162,20 +162,20 @@ def emmeans(df_input, betas, v, key_cell, key_perturb, ctrl):
 
     # reverse contrasts (make sure the ref is control)
     pairwise = pairwise.loc[(pairwise['perturbation'].isin(selected_p)) & (pairwise['cell_type'].isin(selected_c)), :]
-    pairwise["mean"] = - pairwise["mean"]
-    pairwise["lci"] = - pairwise["lci"]
-    pairwise["uci"] = - pairwise["uci"]
-    pairwise["z"] = - pairwise["z"]
+    pairwise['mean'] = - pairwise['mean']
+    pairwise['lci'] = - pairwise['lci']
+    pairwise['uci'] = - pairwise['uci']
+    pairwise['z'] = - pairwise['z']
 
     pairwise['perturbation'] = [x[::-1] for x in pairwise['perturbation']]
     pairwise['contrast'] = [(c[0] + '_' + p[0] + '-' + c[1] + '_' + p[1]) for (c, p) in zip(pairwise['cell_type'], pairwise['perturbation'])]
-    pairwise.set_index("contrast", inplace = True)
+    pairwise.set_index('contrast', inplace = True)
     return pairwise
 
 def glm_gene_chunk(genes, df_input, adjust_batch = True, add_dummy = True):
-    """
+    '''
     Get GLM models for genes in a chunk during multiprocessing
-    """
+    '''
     # add dummy values
     if add_dummy:
         1
@@ -186,22 +186,22 @@ def glm_gene_chunk(genes, df_input, adjust_batch = True, add_dummy = True):
     # build the glm model
     for gene in genes:
         if adjust_batch:
-            formula = gene + " ~ " + key_celltype + " * " + key_perturb + " + " + key_batch
-            formula_ref = gene + " ~ " + key_celltype + " + " + key_perturb + " + " + key_batch # reference glm model without interaction
+            formula = gene + ' ~ ' + key_celltype + ' * ' + key_perturb + ' + ' + key_batch
+            formula_ref = gene + ' ~ ' + key_celltype + ' + ' + key_perturb + ' + ' + key_batch # reference glm model without interaction
         else:
-            formula = gene + " ~ " + key_celltype + " * " + key_perturb
-            formula_ref = gene + " ~ " + key_celltype + " + " + key_perturb # reference glm model without interaction
+            formula = gene + ' ~ ' + key_celltype + ' * ' + key_perturb
+            formula_ref = gene + ' ~ ' + key_celltype + ' + ' + key_perturb # reference glm model without interaction
         
         try:
             # glm_result = smf.glm(formula = formula,
             #                     offset = np.log(df_input[key_size_factor]), 
             #                     data = df_input,
-            #                     family = sm.families.NegativeBinomial()).fit(method="lbfgs")
+            #                     family = sm.families.NegativeBinomial()).fit(method='lbfgs')
 
             # glm_ref_result = smf.glm(formula = formula_ref,
             #                             offset = np.log(df_input[key_size_factor]), 
             #                             data = df_input,
-            #                             family = sm.families.NegativeBinomial()).fit(method="lbfgs")
+            #                             family = sm.families.NegativeBinomial()).fit(method='lbfgs')
 
             glm_result = smf.glm(formula = formula,
                                 offset = np.log(df_input[key_size_factor]), 
@@ -246,35 +246,35 @@ def glm_gene_chunk(genes, df_input, adjust_batch = True, add_dummy = True):
         df_pairwiseComp['pts_contrast'] = list(df_nonzero.loc[contrast_tuples])
         df_pairwiseComp['pts_reference'] = list(df_nonzero.loc[reference_tuples])
 
-        df_pairwiseComp["gene"] = gene
+        df_pairwiseComp['gene'] = gene
         df_pairwiseComp_chunk = pd.concat([df_pairwiseComp_chunk, df_pairwiseComp], axis = 0)
 
         # format output
         conf_int = glm_result.conf_int().loc[covariates_cp,:].copy()
-        conf_int.rename({0: "lower bound", 1: "upper bound"}, axis = 1, inplace = True)
+        conf_int.rename({0: 'lower bound', 1: 'upper bound'}, axis = 1, inplace = True)
         
         pvals = pd.DataFrame(glm_result.pvalues[covariates_cp])
-        pvals.rename({0: "pvals"}, axis = 1, inplace = True)
+        pvals.rename({0: 'pvals'}, axis = 1, inplace = True)
 
         std_errs = pd.DataFrame(glm_result.bse[covariates_cp])
-        std_errs.rename({0: "standard err"}, axis = 1, inplace = True)
+        std_errs.rename({0: 'standard err'}, axis = 1, inplace = True)
 
         mu = pd.DataFrame(glm_result.params[covariates_cp])
-        mu.rename({0: "mu"}, axis = 1, inplace = True)
+        mu.rename({0: 'mu'}, axis = 1, inplace = True)
         
         # add coefficient metadat onto the table
         df_meta_coeffs = extract_covar_name(conf_int.index.values, key_celltype, key_perturb)        
         
         df_output = pd.concat([df_meta_coeffs, conf_int, pvals, mu, std_errs], axis = 1)
-        df_output["gene"] = gene
-        df_output["LRT_pval"] = p
+        df_output['gene'] = gene
+        df_output['LRT_pval'] = p
         df_output_chunk = pd.concat([df_output_chunk, df_output], axis = 0)
 
     return df_output_chunk, df_pairwiseComp_chunk
 
 
-def model_genes(adata, gene_selection = "all", n_processes = 16, chunksize = 100, adjust_batch = True, add_dummy = True, pairwise_contrast_only = False, output_suffix = None):
-    """
+def model_genes(adata, gene_selection = 'all', n_processes = 16, chunksize = 100, adjust_batch = True, add_dummy = True, pairwise_contrast_only = False, output_suffix = None):
+    '''
     Build a model for each gene and curate predictions from iterations.
     Multiprocessing is used here.
 
@@ -286,25 +286,25 @@ def model_genes(adata, gene_selection = "all", n_processes = 16, chunksize = 100
         Whether to select all genes or not
     n_processes
         number of processes to be used
-    """
+    '''
 
     # initialization
 
-    logger.info("Start to run the model.")
-    logger.info("Number of processes: " + str(n_processes))
-    logger.info("Chunksize: " + str(chunksize))
+    logger.info('Start to run the model.')
+    logger.info('Number of processes: ' + str(n_processes))
+    logger.info('Chunksize: ' + str(chunksize))
 
     global key_celltype; global key_perturb; global key_size_factor; global key_batch; global group_control
     
-    key_celltype = adata.uns["celldrift"]["cell_type_key"]
-    key_perturb = adata.uns["celldrift"]["perturb_key"]
-    key_size_factor = adata.uns["celldrift"]["size_factor_key"]    
-    key_batch = adata.uns["celldrift"]["batch_key"]  
-    group_control = adata.uns["celldrift"]["group_control"]
-    n_coeffs = adata.uns["celldrift"]["n_coefficients"]  
-    output_dir = adata.uns["celldrift"]["output_dir"]
+    key_celltype = adata.uns['celldrift']['cell_type_key']
+    key_perturb = adata.uns['celldrift']['perturb_key']
+    key_size_factor = adata.uns['celldrift']['size_factor_key']    
+    key_batch = adata.uns['celldrift']['batch_key']  
+    group_control = adata.uns['celldrift']['group_control']
+    n_coeffs = adata.uns['celldrift']['n_coefficients']  
+    output_dir = adata.uns['celldrift']['output_dir']
 
-    if gene_selection == "all":
+    if gene_selection == 'all':
         genes = adata.var.index.values
         n_genes = len(genes)
 
@@ -314,7 +314,7 @@ def model_genes(adata, gene_selection = "all", n_processes = 16, chunksize = 100
     batch_size = n_processes * chunksize # 800 or 1600
     final_batches = []
     for batch_idx in range(0, n_genes, batch_size):
-        logger.info("Start to run batch: " + str(batch_idx))
+        logger.info('Start to run batch: ' + str(batch_idx))
         
         # prepare huge expression table for all chunks in one batch
         genes_idx_batch = range(batch_idx, min(batch_idx + batch_size, n_genes))
@@ -323,7 +323,7 @@ def model_genes(adata, gene_selection = "all", n_processes = 16, chunksize = 100
                                     index = adata.obs.index.values,
                                     columns = genes_batch)
         df_batch_input = pd.concat([df_meta, df_batch_expr], axis = 1)
-        logger.info("Size of input table: " + str(sys.getsizeof(df_batch_input) / (1024*1024)) + " Mb.")
+        logger.info('Size of input table: ' + str(sys.getsizeof(df_batch_input) / (1024*1024)) + ' Mb.')
 
         # separate batch table into chunks
         genes_chunks = []
@@ -341,7 +341,7 @@ def model_genes(adata, gene_selection = "all", n_processes = 16, chunksize = 100
         pool.close()
         pool.join()
 
-        logger.info("Size of outcome of apply: " + str(len(out)))
+        logger.info('Size of outcome of apply: ' + str(len(out)))
         final = []
 
         for collect in out:
@@ -353,10 +353,10 @@ def model_genes(adata, gene_selection = "all", n_processes = 16, chunksize = 100
         final = ray.get(futures)
         '''
         final_batches += final
-        logger.info("Finish batch: " + str(batch_idx))
+        logger.info('Finish batch: ' + str(batch_idx))
 
     # concatenate results
-    logger.info("Start to format modeling output")
+    logger.info('Start to format modeling output')
     df_all = pd.DataFrame()
     df_pairwiseComp_all = pd.DataFrame()
 
@@ -364,78 +364,140 @@ def model_genes(adata, gene_selection = "all", n_processes = 16, chunksize = 100
         df_all = pd.concat([df_all, df_sub], axis = 0)
         df_pairwiseComp_all = pd.concat([df_pairwiseComp_all, df_pairwiseComp_sub], axis = 0)
     
-    suffix = "" if output_suffix == None else output_suffix
+    suffix = '' if output_suffix == None else output_suffix
 
-    df_all.to_csv(output_dir + "glm_predictions" + suffix + ".txt", sep = "\t")
-    df_pairwiseComp_all.to_csv(output_dir + "glm_predictions_pairwise_comparisons" + suffix + ".txt", sep = "\t")
+    df_all.to_csv(output_dir + 'glm_predictions' + suffix + '.txt', sep = '\t')
+    df_pairwiseComp_all.to_csv(output_dir + 'glm_predictions_pairwise_comparisons' + suffix + '.txt', sep = '\t')
     
     df_pred = df_all.copy()
-    genes = [df_pred["gene"][i] for i in np.arange(df_pred.shape[0]) if i % n_coeffs == 0]
-    coeffs = df_pred["x_label"].values[:n_coeffs]
-    adata.uns["celldrift"]["coefficient_names"] = coeffs
+    genes = [df_pred['gene'][i] for i in np.arange(df_pred.shape[0]) if i % n_coeffs == 0]
+    coeffs = df_pred['x_label'].values[:n_coeffs]
+    adata.uns['celldrift']['coefficient_names'] = coeffs
     adata = adata[:, genes].copy() # subset of genes which were fitted successfully using GLM.
 
-    df_mu = pd.DataFrame(index = genes, columns = coeffs, data = np.array(df_pred["mu"]).reshape([len(genes), len(coeffs)]))
-    df_sigma = pd.DataFrame(index = genes, columns = coeffs, data = np.array(df_pred["standard err"]).reshape([len(genes), len(coeffs)]))
-    df_pvals = pd.DataFrame(index = genes, columns = coeffs, data = np.array(df_pred["pvals"]).reshape([len(genes), len(coeffs)]))
-    df_LRT_pval = pd.DataFrame(index = genes, columns = ["LRT_pval"], data = list(df_pred["LRT_pval"][list(range(0, df_pred.shape[0], len(coeffs)))]))
+    df_mu = pd.DataFrame(index = genes, columns = coeffs, data = np.array(df_pred['mu']).reshape([len(genes), len(coeffs)]))
+    df_sigma = pd.DataFrame(index = genes, columns = coeffs, data = np.array(df_pred['standard err']).reshape([len(genes), len(coeffs)]))
+    df_pvals = pd.DataFrame(index = genes, columns = coeffs, data = np.array(df_pred['pvals']).reshape([len(genes), len(coeffs)]))
+    df_LRT_pval = pd.DataFrame(index = genes, columns = ['LRT_pval'], data = list(df_pred['LRT_pval'][list(range(0, df_pred.shape[0], len(coeffs)))]))
 
     if not pairwise_contrast_only:
-        df_mu.to_csv(output_dir + "glm_predictions_parameters" + suffix + ".txt", sep = "\t")
-        df_sigma.to_csv(output_dir + "glm_predictions_standard_errors" + suffix + ".txt", sep = "\t")
-        df_pvals.to_csv(output_dir + "glm_predictions_pvals" + suffix + ".txt", sep = "\t")
-        df_LRT_pval.to_csv(output_dir + "glm_predictions_LRT_pvals" + suffix + ".txt", sep = "\t")
+        df_mu.to_csv(output_dir + 'glm_predictions_parameters' + suffix + '.txt', sep = '\t')
+        df_sigma.to_csv(output_dir + 'glm_predictions_standard_errors' + suffix + '.txt', sep = '\t')
+        df_pvals.to_csv(output_dir + 'glm_predictions_pvals' + suffix + '.txt', sep = '\t')
+        df_LRT_pval.to_csv(output_dir + 'glm_predictions_LRT_pvals' + suffix + '.txt', sep = '\t')
 
     # select specific perturbation comparisons
     # terms = []
     # for celltype in np.unique(df_input[key_celltype]):
-    #     term_name = celltype + "_" + group_perturb + "-" + celltype + "_" + group_control
+    #     term_name = celltype + '_' + group_perturb + '-' + celltype + '_' + group_control
     #     terms.append(term_name)
-    n_pairwise_terms = adata.uns["celldrift"]["n_cell_types"] * (adata.uns['celldrift']['n_perturbations'] - 1)
+    n_pairwise_terms = adata.uns['celldrift']['n_cell_types'] * (adata.uns['celldrift']['n_perturbations'] - 1)
     terms = df_pairwiseComp_all.index.values[:n_pairwise_terms]
-    adata.uns["celldrift"]["multicomp_terms"] = terms
+    adata.uns['celldrift']['multicomp_terms'] = terms
 
-    df_multcomp_mu = pd.DataFrame(index = genes, columns = terms, data = np.array(df_pairwiseComp_all["mean"]).reshape([len(genes), len(terms)]))
-    df_multcomp_SE = pd.DataFrame(index = genes, columns = terms, data = np.array(df_pairwiseComp_all["SE"]).reshape([len(genes), len(terms)]))
-    df_multcomp_lci = pd.DataFrame(index = genes, columns = terms, data = np.array(df_pairwiseComp_all["lci"]).reshape([len(genes), len(terms)]))
-    df_multcomp_uci = pd.DataFrame(index = genes, columns = terms, data = np.array(df_pairwiseComp_all["uci"]).reshape([len(genes), len(terms)]))
-    df_multcomp_pvals = pd.DataFrame(index = genes, columns = terms, data = np.array(df_pairwiseComp_all["p_fdr"]).reshape([len(genes), len(terms)]))
+    df_multicomp_mu = pd.DataFrame(index = genes, columns = terms, data = np.array(df_pairwiseComp_all['mean']).reshape([len(genes), len(terms)]))
+    df_multicomp_SE = pd.DataFrame(index = genes, columns = terms, data = np.array(df_pairwiseComp_all['SE']).reshape([len(genes), len(terms)]))
+    df_multicomp_lci = pd.DataFrame(index = genes, columns = terms, data = np.array(df_pairwiseComp_all['lci']).reshape([len(genes), len(terms)]))
+    df_multicomp_uci = pd.DataFrame(index = genes, columns = terms, data = np.array(df_pairwiseComp_all['uci']).reshape([len(genes), len(terms)]))
+    df_multicomp_pvals = pd.DataFrame(index = genes, columns = terms, data = np.array(df_pairwiseComp_all['p_fdr']).reshape([len(genes), len(terms)]))
 
     # add information to anndata
-    adata.varm["pred_mu"] = df_mu.loc[adata.var_names, :].values
-    adata.varm["pred_sigma"] = df_sigma.loc[adata.var_names, :].values
-    adata.varm["pred_pvals"] = df_pvals.loc[adata.var_names, :].values
+    adata.varm['pred_mu'] = df_mu.loc[adata.var_names, :].values
+    adata.varm['pred_sigma'] = df_sigma.loc[adata.var_names, :].values
+    adata.varm['pred_pvals'] = df_pvals.loc[adata.var_names, :].values
 
-    adata.varm["multcomp_mu"] = df_multcomp_mu.loc[adata.var_names, :].values
-    adata.varm["multcomp_SE"] = df_multcomp_SE.loc[adata.var_names, :].values
-    adata.varm["multcomp_lci"] = df_multcomp_lci.loc[adata.var_names, :].values
-    adata.varm["multcomp_uci"] = df_multcomp_uci.loc[adata.var_names, :].values
-    adata.varm["multcomp_pvals"] = df_multcomp_pvals.loc[adata.var_names, :].values
+    adata.varm['multicomp_mu'] = df_multicomp_mu.loc[adata.var_names, :].values
+    adata.varm['multicomp_SE'] = df_multicomp_SE.loc[adata.var_names, :].values
+    adata.varm['multicomp_lci'] = df_multicomp_lci.loc[adata.var_names, :].values
+    adata.varm['multicomp_uci'] = df_multicomp_uci.loc[adata.var_names, :].values
+    adata.varm['multicomp_pvals'] = df_multicomp_pvals.loc[adata.var_names, :].values
     
-    adata.var["LRT_pvals"] = df_LRT_pval["LRT_pval"]
+    adata.var['LRT_pvals'] = df_LRT_pval['LRT_pval']
 
     return adata
 
 
-def model_selection(adata, pval_LRT = 0.05, pval_multcomp = 0.05):
-    """
+def model_selection(adata, pval_LRT = 0.05, pval_multicomp = 0.05):
+    '''
     Select model for better downstream analysis
-    """
+    '''
     # categorize genes using 
     df_genes = adata.var.copy()
 
-    df_multcomp_pvals = pd.DataFrame(data = adata.varm["multcomp_pvals"], 
+    df_multicomp_pvals = pd.DataFrame(data = adata.varm['multicomp_pvals'], 
                                     index = adata.var_names, 
-                                    columns = adata.uns["celldrift"]["multicomp_terms"])
+                                    columns = adata.uns['celldrift']['multicomp_terms'])
 
-    genes_perturbed = df_multcomp_pvals.index.values[np.min(df_multcomp_pvals, axis = 1) < pval_multcomp]
-    genes_perturbed_AcrossTypes = df_genes.loc[df_genes["LRT_pvals"] < pval_LRT, :].index.values
-    logger.info("Number of perturbed genes: " + str(len(genes_perturbed)))
-    logger.info("Number of genes perturbed differently across cell types: " + str(len(genes_perturbed_AcrossTypes)))
+    genes_perturbed = df_multicomp_pvals.index.values[np.min(df_multicomp_pvals, axis = 1) < pval_multicomp]
+    genes_perturbed_AcrossTypes = df_genes.loc[df_genes['LRT_pvals'] < pval_LRT, :].index.values
+    logger.info('Number of perturbed genes: ' + str(len(genes_perturbed)))
+    logger.info('Number of genes perturbed differently across cell types: ' + str(len(genes_perturbed_AcrossTypes)))
 
-    adata.var["perturbed_genes"] = 0
-    adata.var["differentially_perturbed_genes"] = 0
-    adata.var.loc[genes_perturbed, "perturbed_genes"] = 1
-    adata.var.loc[genes_perturbed_AcrossTypes, "differentially_perturbed_genes"] = 1
+    adata.var['perturbed_genes'] = 0
+    adata.var['differentially_perturbed_genes'] = 0
+    adata.var.loc[genes_perturbed, 'perturbed_genes'] = 1
+    adata.var.loc[genes_perturbed_AcrossTypes, 'differentially_perturbed_genes'] = 1
 
     return adata
+
+def model_timescale(adata, **kwargs):
+    '''
+    run the GLM model across multiple time points. Also refer to model_genes to see model for one time point.
+
+    Parameters
+    ----------
+    adata
+        CellDrift anndata
+    **kwargs
+        model_genes proporties
+    '''
+    time_key = adata.uns['celldrift']['time_key']
+    time_points = adata.obs[time_key].unique()
+    output_dir = adata.uns['celldrift']['output_dir']
+
+    for time in time_points:
+        time_val = str(np.round(time,2))
+        logger.info('Run GLM model for time point ' + time_val)
+        adata_time = adata[adata.obs[time_key] == time, : ].copy()
+        adata_time = model_genes(adata_time, output_suffix = '_time_' + time_val, **kwargs)
+        adata_time = model_selection(adata_time)
+        adata_time.write(output_dir + 'time_' + time_val + '.h5ad')
+        
+
+def organize_output(output_folder = 'output_celldrift/', suffix = ''):
+    output_files = [i for i in os.listdir(output_folder) if (i.startswith('glm_predictions_pairwise_comparisons_'))]
+
+    df_meta = pd.DataFrame(columns = ['time', 'perturbation', 'cell_type'])
+    
+    for idx, output_file in enumerate(tqdm(output_files)):    
+        # get basic information
+        df_pairwise = pd.read_csv(output_folder + output_file, sep = '\t', header = 0)
+        time = output_file.split('glm_predictions_pairwise_comparisons_time_')[1].split('.txt')[0]
+        
+        n_types = len(np.unique(df_pairwise['cell_type']))
+        n_perts = len(np.unique(df_pairwise['perturbation']))
+        n_genes = len(np.unique(df_pairwise['gene']))
+
+        # make graph per (time + pert)
+        df_pairwise['zscore'] = df_pairwise['z']
+        coeff_vals = df_pairwise['zscore'].values.reshape([n_genes, n_types * n_perts])
+
+        genes = list(df_pairwise.sort_values(by = ['cell_type', 'perturbation', 'gene'])['gene'][ : n_genes])
+        contrasts = [(time + '_' + i) for i in list(df_pairwise['contrast'][ : n_types * n_perts])]
+        avail_types = [(i.split('\',')[0].split('(\'')[1]) for i in list(df_pairwise['cell_type'][:(n_types * n_perts)])]
+        avail_perts = [(i.split('\',')[0].split('(\'')[1]) for i in list(df_pairwise['perturbation'][:(n_types * n_perts)])]
+        
+        df_graph = pd.DataFrame(data = coeff_vals, index = genes, columns = contrasts)
+
+        if idx == 0:
+            df_combined = df_graph.copy()
+        else:
+            df_combined = pd.concat([df_combined, df_graph], axis = 1, join = 'outer')
+        
+        for contrast, cell_type, pert in zip(contrasts, avail_types, avail_perts):
+            df_meta.loc[contrast, : ] =  [time, pert, cell_type]
+
+    df_combined.to_csv('fda_celldrift/pairwise_zscores_combined_' + suffix + '.txt', sep = '\t')
+    df_meta.to_csv('fda_celldrift/pairwise_contrasts_metadata_' + suffix + '.txt', sep = '\t')
+
+    return df_combined, df_meta
