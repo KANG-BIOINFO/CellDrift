@@ -47,6 +47,7 @@ adata = ct.model_timescale(
     adjust_batch = False
 )
 os.listdir('output_celldrift')
+
 >>> ['time_1.0.h5ad', 'glm_predictions_time_0.33.txt', 'time_0.67.h5ad', 'glm_predictions_pairwise_comparisons_time_0.11.txt', 'glm_predictions_time_0.89.txt', 'glm_predictions_pairwise_comparisons_time_0.22.txt', 'time_0.33.h5ad', 'time_0.0.h5ad', 'glm_predictions_pairwise_comparisons_time_0.56.txt', 'glm_predictions_pairwise_comparisons_time_0.0.txt', 'glm_predictions_pairwise_comparisons_time_0.33.txt', 'glm_predictions_pairwise_comparisons_time_1.0.txt', 'glm_predictions_time_0.22.txt', 'time_0.11.h5ad', 'glm_predictions_time_0.44.txt', 'time_0.22.h5ad', 'time_0.89.h5ad', 'glm_predictions_pairwise_comparisons_time_0.44.txt', 'glm_predictions_time_1.0.txt', 'glm_predictions_time_0.11.txt', 'time_0.56.h5ad', 'glm_predictions_time_0.67.txt', 'glm_predictions_time_0.56.txt', 'glm_predictions_time_0.0.txt', 'time_0.44.h5ad', 'time_0.78.h5ad', 'glm_predictions_pairwise_comparisons_time_0.89.txt', 'glm_predictions_pairwise_comparisons_time_0.67.txt', 'glm_predictions_time_0.78.txt', 'glm_predictions_pairwise_comparisons_time_0.78.txt']
 ```
 
@@ -54,8 +55,10 @@ os.listdir('output_celldrift')
 ```python
 ct.organize_output(output_folder = 'output_celldrift/')
 os.listdir('fda_celldrift')
+
+>>> ['pairwise_contrasts_metadata_.txt', 'pairwise_zscores_combined_.txt']
 ```
-['pairwise_contrasts_metadata_.txt', 'pairwise_zscores_combined_.txt']
+
 
 5. set up FDA object
 ```python
@@ -94,9 +97,9 @@ ct.draw_smoothing_clusters(
 )
 ```
 Visualization of several clusters (smoothing using LR method)
-Pattern1
+#### Pattern1
 ![pattern1](../Examples/test_data/fda_celldrift/figures/LR_smoothing_0.png)
-Pattern2
+#### Pattern2
 ![pattern2](../Examples/test_data/fda_celldrift/figures/LR_smoothing_1.png)
-Pattern3
+#### Pattern3
 ![pattern3](../Examples/test_data/fda_celldrift/figures/LR_smoothing_2.png)
