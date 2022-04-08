@@ -1,48 +1,27 @@
-# CellDrift
-CellDrift: temporal perturbation effects for single cell data
+# Example of simulated data
 
-Perturbation effects on gene programs are commonly investigated in single-cell experiments. Existing models measure perturbation responses independently across time series, disregarding the temporal consistency of specific gene programs. We introduce CellDrift, a generalized linear model based functional data analysis approach to investigate temporal gene patterns in response to perturbations. 
-![overview](Examples/overview.png)
+We simulated one single cell dataset to as one demo example for CellDrift pipeline. 
+The data can be downloaded in this [link](https://github.com/KANG-BIOINFO/CellDrift/blob/main/Examples/test_data/simulation_n_times_10_rep0.h5ad), which contains 1600 cells and 60 genes. We simulated three temporal patterns, including patterns with positive and negative correlation with time, as well as a time-insensitive pattern. We demonstate CellDrift by accurately recover three patterns.
 
-### Reference
-```
-It has been presented as a poster on ProbGen22. The manuscript is in preparation and will come out soon.
-```
 
-### Prerequisite
-```python
-# we highly recommend users to install the developing version of scikit-fda from github
-# it contains some new functions of smoothing compared to scikit-fda 0.7.1
-# a new anaconda environment is preferred.
-pip install git+https://github.com/GAA-UAM/scikit-fda.git
-```
-
-### Installation
-```python
-git clone https://github.com/KANG-BIOINFO/CellDrift.git
-cd CellDrift
-pip install .
-```
-
-### Tutorial
-- [Example on a simple simulated data]()
-- [Example on COVID-19 Atlas (under construction)]()
-- [Example on Gut Differentiation (under construction)]()
-
-### Quick Start
+1. Load data and preparation
 ```python
 import numpy as np
 import scanpy as sc
 import CellDrift as ct
-```
 
-Load data and preparation
-```python
-adata = sc.read("example.h5ad")
-adata.obs['size_factor'] = np.sum(adata.X, axis = 1)
+adata = sc.read('simulation_n_times_10_rep0.h5ad')
+adata.obs['size_factor'] = np.sum(adata.X, axis = 1) # compuate size factor
+adata.obs['batch'] = 0 # assume there's only one batch
+adata
 ```
+>>> adata
+AnnData object with n_obs × n_vars = 6000 × 60
+    obs: 'cell_type', 'perturb', 'time', 'batch'
+    uns: 'M', 'N', 'beta_metadata', 'n_perts', 'n_types', 'theta'
+    varm: 'beta'
 
-Set up CellDrift object
+2. Set up CellDrift object
 ```python
 adata = ct.setup_celldrift(
     adata, 
@@ -52,12 +31,12 @@ adata = ct.setup_celldrift(
     control_name = 'Control', 
     perturb_name = None, 
     size_factor_key = 'size_factor', 
-    batch_key = 'batch', 
-    min_cells_perGene = 0
+    batch_key = 'batch'
 )
 ```
 
-Run GLM model 
+
+3. Run GLM model 
 ```python
 adata = ct.model_timescale(
     adata, 
@@ -66,14 +45,18 @@ adata = ct.model_timescale(
     pairwise_contrast_only = True, 
     adjust_batch = False
 )
+os.listdir('output_celldrift')
 ```
+['time_1.0.h5ad', 'glm_predictions_time_0.33.txt', 'time_0.67.h5ad', 'glm_predictions_pairwise_comparisons_time_0.11.txt', 'glm_predictions_time_0.89.txt', 'glm_predictions_pairwise_comparisons_time_0.22.txt', 'time_0.33.h5ad', 'time_0.0.h5ad', 'glm_predictions_pairwise_comparisons_time_0.56.txt', 'glm_predictions_pairwise_comparisons_time_0.0.txt', 'glm_predictions_pairwise_comparisons_time_0.33.txt', 'glm_predictions_pairwise_comparisons_time_1.0.txt', 'glm_predictions_time_0.22.txt', 'time_0.11.h5ad', 'glm_predictions_time_0.44.txt', 'time_0.22.h5ad', 'time_0.89.h5ad', 'glm_predictions_pairwise_comparisons_time_0.44.txt', 'glm_predictions_time_1.0.txt', 'glm_predictions_time_0.11.txt', 'time_0.56.h5ad', 'glm_predictions_time_0.67.txt', 'glm_predictions_time_0.56.txt', 'glm_predictions_time_0.0.txt', 'time_0.44.h5ad', 'time_0.78.h5ad', 'glm_predictions_pairwise_comparisons_time_0.89.txt', 'glm_predictions_pairwise_comparisons_time_0.67.txt', 'glm_predictions_time_0.78.txt', 'glm_predictions_pairwise_comparisons_time_0.78.txt']
 
-Organize the output for functional data analysis (FDA)
+4. Organize the output for functional data analysis (FDA)
 ```python
 ct.organize_output(output_folder = 'output_celldrift/')
+os.listdir('fda_celldrift')
 ```
+['pairwise_contrasts_metadata_.txt', 'pairwise_zscores_combined_.txt']
 
-set up FDA object
+5. set up FDA object
 ```python
 df_zscore = pd.read_csv('fda_celldrift/pairwise_zscores_combined_.txt', sep = '\t', header = 0, index_col = 0)
 df_meta = pd.read_csv('fda_celldrift/pairwise_contrasts_metadata_.txt', sep = '\t', header = 0, index_col = 0)
@@ -81,13 +64,20 @@ df_meta = pd.read_csv('fda_celldrift/pairwise_contrasts_metadata_.txt', sep = '\
 fda = ct.FDA(df_zscore, df_meta)
 ```
 
-temporal clustering
+6. temporal clustering
 ```python
 fd, genes = fda.create_fd_genes(genes = df_zscore.index.values, cell_type = 'Type_0', perturbation = 'Perturb_0')
 df_cluster = ct.fda_cluster(fd, genes, n_clusters = 3)
+df_cluster.head()
 ```
+     genes  clusters_kmeans  clusters_fuzzy
+0   Gene_0                0               0
+1   Gene_1                0               0
+2  Gene_10                0               0
+3  Gene_11                0               0
+4  Gene_12                0               0
 
-visualization for each temporal cluster
+7. visualization for each temporal cluster
 ```python
 genes = df_zscore.index.values
 ct.draw_smoothing_clusters(
@@ -100,3 +90,10 @@ ct.draw_smoothing_clusters(
     output_folder = 'fda_celldrift/figures/'
 )
 ```
+Visualization of several clusters (smoothing using LR method)
+Pattern1
+![pattern1](Examples/test_data/fda_celldrift/figures/LR_smoothing_0.png)
+Pattern2
+![pattern2](Examples/test_data/fda_celldrift/figures/LR_smoothing_1.png)
+Pattern3
+![pattern3](Examples/test_data/fda_celldrift/figures/LR_smoothing_2.png)
