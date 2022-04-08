@@ -17,8 +17,6 @@ setup(
         'seaborn',
         'scipy',
         'statsmodels',
-        'scikit-fda',
-        'dtw',
-        'pylab'
+        'dtw'
     ],
 )

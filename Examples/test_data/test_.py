@@ -1,12 +1,14 @@
 import os
-import sys
-import random
 import pandas as pd 
 import numpy as np
 import scanpy as sc
-
-sys.path.insert(1, '/data/aronow/Kang/CellDrift/CellDrift/')
 import CellDrift as ct
+# import skfda
+# import skfda.misc.hat_matrix as hm
+# from skfda.inference.anova import oneway_anova
+# from skfda.representation import FDataGrid, FDataBasis
+# from skfda.ml.clustering import FuzzyCMeans, KMeans
+# from skfda.preprocessing.smoothing import KernelSmoother
 
 adata = sc.read('simulation_n_times_10_rep0.h5ad')
 adata.obs['size_factor'] = np.sum(adata.X, axis = 1)
@@ -16,10 +18,6 @@ adata = ct.setup_celldrift(adata, cell_type_key = 'cell_type', perturb_key = 'pe
                         perturb_name = None, size_factor_key = 'size_factor', batch_key = 'batch', min_cells_perGene = 0)
 
 adata = ct.model_timescale(adata, n_processes = 1, chunksize=60, pairwise_contrast_only = True, adjust_batch = False)
-# adata.write('test_output_v1.h5ad')
-
-# adata = ct.model_selection(adata)
-# adata.write('test_output_v2.h5ad')
 
 ct.organize_output(output_folder = 'output_celldrift/')
 

@@ -9,6 +9,14 @@ Perturbation effects on gene programs are commonly investigated in single-cell e
 It has been presented as a poster on ProbGen22. The manuscript is in preparation and will come out soon.
 ```
 
+### Prerequisite
+```python
+# we highly recommend users to install the developing version of scikit-fda from github
+# it contains some new functions of smoothing compared to scikit-fda 0.7.1
+# a new anaconda environment is preferred.
+pip install git+https://github.com/GAA-UAM/scikit-fda.git
+```
+
 ### Installation
 ```python
 git clone https://github.com/KANG-BIOINFO/CellDrift.git
