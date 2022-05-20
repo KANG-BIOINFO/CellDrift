@@ -1,7 +1,6 @@
-# Example of simulated data
+# Example of Fetal Gut Differentiation
+This 
 
-We simulated one single cell dataset to as one demo example for CellDrift pipeline. 
-The data can be downloaded in this [link](https://github.com/KANG-BIOINFO/CellDrift/blob/main/Examples/test_data/simulation_n_times_10_rep0.h5ad), which contains 1600 cells and 60 genes. We simulated three temporal patterns, including patterns with positive and negative correlation with time, as well as a time-insensitive pattern. We demonstate CellDrift by accurately recover three patterns.
 
 
 1. Load data and preparation
@@ -39,8 +38,6 @@ adata = ct.setup_celldrift(
 
 3. Run GLM model 
 ```python
-# This is usually a time-consuiming step for large dataset.
-# Multi-processing is used to improve the speed.
 adata = ct.model_timescale(
     adata, 
     n_processes = 16, # number of processes for multiprocessing
@@ -48,7 +45,6 @@ adata = ct.model_timescale(
     pairwise_contrast_only = True, 
     adjust_batch = False
 )
-# output files
 os.listdir('output_celldrift')
 
 >>> ['time_1.0.h5ad', 'glm_predictions_time_0.33.txt', 'time_0.67.h5ad', 'glm_predictions_pairwise_comparisons_time_0.11.txt', 'glm_predictions_time_0.89.txt', 'glm_predictions_pairwise_comparisons_time_0.22.txt', 'time_0.33.h5ad', 'time_0.0.h5ad', 'glm_predictions_pairwise_comparisons_time_0.56.txt', 'glm_predictions_pairwise_comparisons_time_0.0.txt', 'glm_predictions_pairwise_comparisons_time_0.33.txt', 'glm_predictions_pairwise_comparisons_time_1.0.txt', 'glm_predictions_time_0.22.txt', 'time_0.11.h5ad', 'glm_predictions_time_0.44.txt', 'time_0.22.h5ad', 'time_0.89.h5ad', 'glm_predictions_pairwise_comparisons_time_0.44.txt', 'glm_predictions_time_1.0.txt', 'glm_predictions_time_0.11.txt', 'time_0.56.h5ad', 'glm_predictions_time_0.67.txt', 'glm_predictions_time_0.56.txt', 'glm_predictions_time_0.0.txt', 'time_0.44.h5ad', 'time_0.78.h5ad', 'glm_predictions_pairwise_comparisons_time_0.89.txt', 'glm_predictions_pairwise_comparisons_time_0.67.txt', 'glm_predictions_time_0.78.txt', 'glm_predictions_pairwise_comparisons_time_0.78.txt']
@@ -61,6 +57,7 @@ os.listdir('fda_celldrift')
 
 >>> ['pairwise_contrasts_metadata_.txt', 'pairwise_zscores_combined_.txt']
 ```
+
 
 5. set up FDA object
 ```python

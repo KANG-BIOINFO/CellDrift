@@ -6,14 +6,15 @@ Perturbation effects on gene programs are commonly investigated in single-cell e
 
 ### Reference
 ```
-It has been presented as a poster on ProbGen22. The manuscript is in preparation and will come out soon.
+CellDrift: Inferring Perturbation Responses in Temporally-Sampled Single Cell Data. BioRxiv. Apr 2022 (https://www.biorxiv.org/content/10.1101/2022.04.13.488194v1)
 ```
 
 ### Prerequisite
 ```python
-# we highly recommend users to install the developing version of scikit-fda from github
-# it contains some new functions of smoothing compared to scikit-fda 0.7.1
-# a new anaconda environment is preferred.
+# It's recommended to create a new environment using conda (python 3.7 is recommended)
+conda create -n celldrift_py python=3.7
+# Install prerequisite package scikit-fda (development version)
+conda activate celldrift_py # activate celldrift environment
 pip install git+https://github.com/GAA-UAM/scikit-fda.git
 ```
 
@@ -26,7 +27,8 @@ pip install .
 
 ### Tutorial
 - [Example on a simple simulated data](https://github.com/KANG-BIOINFO/CellDrift/blob/main/Tutorial/simulation_demo.md)
-- [Example on COVID-19 Atlas (under construction)]()
+- [Example on COVID-19 Atlas](https://github.com/KANG-BIOINFO/CellDrift/blob/main/Tutorial/covid_tutorial.md)
+- [Example on Fetal Gut Differentiation](https://github.com/KANG-BIOINFO/CellDrift/blob/main/Tutorial/gut_atlas_tutorial.md)
 
 ### Quick Start
 ```python
