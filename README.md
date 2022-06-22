@@ -26,9 +26,8 @@ pip install .
 ```
 
 ### Tutorial
-- [Example on a simple simulated data](https://github.com/KANG-BIOINFO/CellDrift/blob/main/Tutorial/simulation_demo.md)
-- [Example on COVID-19 Atlas](https://github.com/KANG-BIOINFO/CellDrift/blob/main/Tutorial/covid_tutorial.md)
-- [Example on Fetal Gut Differentiation](https://github.com/KANG-BIOINFO/CellDrift/blob/main/Tutorial/gut_atlas_tutorial.md)
+- [Example on HIV Infection Study](https://github.com/KANG-BIOINFO/CellDrift/blob/main/Tutorial/hiv_infection_tutorial.md)
+- [Example on Pseudo-time Data of Brain Organoid Development](https://github.com/KANG-BIOINFO/CellDrift/blob/main/Tutorial/brain_pseudotime_tutorial.md)
 
 ### Quick Start
 ```python
