@@ -9,9 +9,13 @@ import matplotlib.pyplot as plt
 import skfda
 import skfda.misc.hat_matrix as hm
 from skfda.inference.anova import oneway_anova
+from skfda.inference.hotelling import hotelling_t2
 from skfda.representation import FDataGrid, FDataBasis
 from skfda.ml.clustering import FuzzyCMeans, KMeans
 from skfda.preprocessing.smoothing import KernelSmoother
+from skfda.preprocessing.dim_reduction.feature_extraction import FPCA
+
+from statsmodels.stats.multitest import fdrcorrection
 
 mpl.rcParams['pdf.fonttype'] = 42
 mpl.rcParams['ps.fonttype'] = 42
@@ -29,6 +33,16 @@ cmap = []
 for name in ['Paired', 'tab20b', 'tab20c']:
     cmap = create_cmap(name, cmap)
 
+#  remove duplicate time alignments
+def make_unique_alignments(aligned_zvalues, aligned_timepoint):
+    # get average z scores for multiple query -> one ref alignment
+    df_align = pd.DataFrame({'aligned_timepoint': aligned_timepoint, 'aligned_zvalues': aligned_zvalues})
+    df_avg = pd.DataFrame(df_align.groupby(by = ['aligned_timepoint']).mean()['aligned_zvalues'])
+
+    updated_timepoint = list(df_avg.index.values)
+    updated_zvalues = list(df_avg['aligned_zvalues'])
+    return (updated_zvalues, updated_timepoint)
+
 class FDA:
     '''
     An object of Functional Data for CellDrift derived perturbation responses.
@@ -45,15 +59,19 @@ class FDA:
         self.zscores = df_zscore
         self.meta = df_meta
         self.n_comps = self.meta.shape[0]
-        self.n_times = len(self.meta['time'])
-        self.n_types = len(self.meta['cell_type'])
-        self.n_perts = len(self.meta['perturbation'])
+        self.n_times = len(self.meta['time'].unique())
+        self.n_types = len(self.meta['cell_type'].unique())
+        self.n_perts = len(self.meta['perturbation'].unique())
+        self.n_reps = len(self.meta['rep'].unique())
+        self.genes = df_zscore.index.values
+        self.combs = df_meta.index.values
 
     def create_fd_genes(
         self, 
         genes,
         cell_type,
-        perturbation                    
+        perturbation,
+        rep = None, 
     ):
         '''
         Create functional data for all genes in one cell type and perturbation combination.
@@ -62,7 +80,12 @@ class FDA:
         df_meta = self.meta.copy()
         df_zscore = self.zscores.copy()
 
+        if rep == None:
+            rep = 1 if 1 in df_meta['rep'].unique() else 'rep1'
+
         df_meta_sub = df_meta.loc[(df_meta['cell_type'] == cell_type) & (df_meta['perturbation'] == perturbation), :].copy()
+        df_meta_sub = df_meta_sub.loc[df_meta_sub['rep'] == rep, : ].copy()
+
         df_meta_sub = df_meta_sub.sort_values(['time'], ascending = True)
         comps = list(df_meta_sub.index.values)
         df_zscore = df_zscore.loc[:, comps]
@@ -78,69 +101,24 @@ class FDA:
         )
         return fd, genes
 
-    def create_fd_perts(
-        self, 
-        gene, 
-        cell_types, 
-        perturbations
-    ):
-        '''
-        Create functional data object for cell types and perturbations of one gene
-        '''
-        # filtering
-        df_meta = self.meta.copy()
-        df_zscore = self.zscores.copy()
-
-        df_meta = df_meta.loc[df_meta['cell_type'].isin(cell_type), :].copy()
-        df_meta = df_meta.loc[df_meta['perturbation'].isin(perturbations), :].copy()
-
-        df_zscore = df_zscore.loc[[gene], :].copy()
-        
-        # order
-        data_matrix = []
-        timepoints = []
-        fd_groups = []
-        samples = []
-
-        for perturbation in perturbations:
-            # preparing data matrix
-            fd_groups.append(group_dict[perturbation])
-
-            df_meta_sub = df_meta.loc[(df_meta['perturbation'] == perturbation), :].copy()
-            df_meta_sub = df_meta_sub.sort_values(['time'], ascending = True)
-            comps = list(df_meta_sub.index.values)
-            df_zscore_sub = df_zscore.loc[:, comps].copy()
-            timepoint = df_meta_sub['time'].to_numpy()
-
-            # create raw data matrix
-            zvalues = df_zscore_sub.loc[gene, :].values
-
-            # ref time
-            data_matrix.append(zvalues)
-            timepoints.append(timepoint)
-
-        # create representation of functional data
-        fd = skfda.FDataGrid(
-            data_matrix = data_matrix,
-            grid_points = timepoints
-        )
-        return fd, fd_groups
-
     def align_create_fd_perts(self,
                             gene, 
-                            cell_types, 
+                            cell_type, 
                             perturbations,
                             ref_perturbation, 
                             step_pattern = 'symmetric2', 
-                            alternative_pattern = 'asymmetric'):
+                            alternative_pattern = 'asymmetric',
+                            reps = None):
         '''
         Perform alignment using dynamic time warping (dtw) and create functional data
         '''
 
         df_meta = self.meta.copy()
         df_zscore = self.zscores.copy()
+        if reps == None:
+            reps = self.n_reps
 
-        df_meta = df_meta.loc[(df_meta['perturbation'].isin(perturbations)) & (df_meta['cell_type'].isin(cell_types)), :].copy()
+        df_meta = df_meta.loc[(df_meta['perturbation'].isin(perturbations)) & (df_meta['cell_type'] == cell_type), :].copy()
         df_zscore = df_zscore.loc[[gene], :].copy()
         
         # order
@@ -149,16 +127,19 @@ class FDA:
         fd_groups = []
         samples = []
 
+        if ref_perturbation == None:
+            ref_perturbation = perturbation[0]
+
         perturbations = list(np.setdiff1d(perturbations, ref_perturbation))
         perturbations = [ref_perturbation] + perturbations
-
-        for perturbation in perturbations:
-            for cell_type in cell_types:
+        
+        for rep in range(1, reps + 1):
+            for perturbation in perturbations:
                 # preparing data matrix
-                fd_groups.append(group_dict[perturbation])
+                fd_groups.append(perturbation) # a better way of definition?
                 samples.append(perturbation)
 
-                df_meta_sub = df_meta.loc[(df_meta['perturbation'] == perturbation), :].copy()
+                df_meta_sub = df_meta.loc[(df_meta['perturbation'] == perturbation) & (df_meta['rep'] == rep), :].copy()
                 df_meta_sub = df_meta_sub.sort_values(['time'], ascending = True)
 
                 comps = list(df_meta_sub.index.values)
@@ -201,7 +182,100 @@ class FDA:
         )
         return fd, fd_groups
 
-def fda_cluster(fd, genes, n_clusters = 20, seed = 42, output_folder = 'fda_celldrift/'):
+    def check_timeSeries_consistency(
+        self,
+        perturbations
+    ):
+        df_meta = self.meta.copy()
+        df_zscore = self.zscores.copy()
+
+        for idx, perturb in enumerate(perturbations):
+            df_meta_sub = df_meta.loc[df_meta['perturbation'] == perturb, :].copy()
+            times = df_meta_sub['time'].values
+            if idx == 0:
+                ref_times = times
+            else:
+                if (len(times) != len(ref_times)) or (not np.all(ref_times == times)):
+                    return False
+        return True
+
+    def create_fd_types_perts(
+        self, 
+        gene, 
+        cell_type, 
+        perturbations,
+        reps = None,
+        ref_perturbation = None, 
+        step_pattern = 'symmetric2', 
+        alternative_pattern = 'asymmetric',
+    ):
+        '''
+        Create functional data object for cell types and perturbations of one gene
+        '''
+        if self.check_timeSeries_consistency(perturbations):
+            # filtering
+            df_meta = self.meta.copy()
+            df_zscore = self.zscores.copy()
+
+            # need to add an alert to ensure timepoints are matching !!!
+            perturbations = [perturbations] if type(perturbations) == 'str' else perturbations
+
+            if reps == None:
+                reps = self.meta['rep'].unique()
+            df_meta = df_meta.loc[df_meta['cell_type'] == cell_type, :].copy()
+            df_meta = df_meta.loc[df_meta['perturbation'].isin(perturbations), :].copy()
+            df_meta = df_meta.loc[df_meta['rep'].isin(reps), :].copy()
+            df_meta['comb'] = [i + '-' + j for (i, j) in zip(df_meta['cell_type'], df_meta['perturbation'])]
+
+            df_zscore = df_zscore.loc[[gene], :].copy()
+            
+            # order
+            data_matrix = []
+            fd_groups = []
+            samples = []
+            timepoints_ref = None
+
+            for comb in df_meta['comb'].unique():
+                for rep in reps:
+                    # preparing data matrix
+                    fd_groups.append(comb)
+
+                    df_meta_sub = df_meta.loc[(df_meta['comb'] == comb), :].copy()
+                    df_meta_sub = df_meta_sub.loc[(df_meta_sub['rep'] == rep), :].copy()
+                    
+                    df_meta_sub = df_meta_sub.sort_values(['time'], ascending = True)
+                    comps = list(df_meta_sub.index.values)
+                    df_zscore_sub = df_zscore.loc[:, comps].copy()
+                    timepoints = df_meta_sub['time'].to_numpy()
+                    
+                    if np.array_equal(timepoints_ref, None) and np.array_equal(timepoints, timepoints_ref):
+                        raise Exception(
+                            'Time series in different cell types / perturbations are not consistent.\
+                            Please check function align_create_fd_perts to make sure time series are consistent.'
+                        )
+                    timepoints_ref = timepoints.copy()
+
+                    # create raw data matrix
+                    zvalues = df_zscore_sub.loc[gene, :].values
+                    data_matrix.append(zvalues)
+
+            fd = skfda.FDataGrid(
+                data_matrix = data_matrix,
+                grid_points = timepoints
+            )
+        
+        else:
+            fd, fd_groups = self.align_create_fd_perts(gene = gene, 
+                                                        cell_type = cell_type, 
+                                                        perturbations = perturbations,
+                                                        ref_perturbation = ref_perturbation, 
+                                                        step_pattern = step_pattern, 
+                                                        alternative_pattern = alternative_pattern,
+                                                        reps = reps)
+        return fd, fd_groups
+        
+
+def fda_cluster(fd, genes, n_clusters = 20, seed = 42, suffix = '', output_folder = 'Temporal_CellDrift/'):
     
     # run clustering methods
     kmeans = KMeans(n_clusters = n_clusters, random_state = seed)
@@ -216,19 +290,12 @@ def fda_cluster(fd, genes, n_clusters = 20, seed = 42, output_folder = 'fda_cell
     df_clusters['genes'] = genes
     df_clusters['clusters_kmeans'] = pred_labels
     df_clusters['clusters_fuzzy'] = pred_labels_fuzzy
-    df_clusters.to_csv(output_folder + 'fda_clusters.txt', sep = '\t')
+    df_clusters.to_csv(output_folder + 'FDA_clusters' + suffix + '.txt', sep = '\t')
 
     return df_clusters   
 
-def draw_smoothing(fd, df_clutser, genes, 
-                    method = 'nw', n_neighbors = 2, bandwidth = 1,
-                    cluster_key = 'cluster_fuzzy',
-                    output_folder = 'fda_celldrift/figures/smoothing_percluster/'):
-    
-    genes_all = df_cluster.index.values
-    sub_indices = list(np.where(np.in1d(genes_all, genes))[0])
-
-    fd_sub = fd[sub_indices]
+def draw_smoothing(fd, method = 'nw', n_neighbors = 2, bandwidth = 1,
+                    output_folder = 'Figures_CellDrift/', fig_name_suffix = None):
 
     if method == 'knn':
         smoother = KernelSmoother(kernel_estimator=hm.KNeighborsHatMatrix(n_neighbors = n_neighbors))
@@ -237,21 +304,29 @@ def draw_smoothing(fd, df_clutser, genes,
     else:
         smoother = KernelSmoother(kernel_estimator=hm.NadarayaWatsonHatMatrix(bandwidth = bandwidth))
     
-    smoother.fit(fd_sub)
-    fd_smoothed = smoother.transform(fd_sub)
+    smoother.fit(fd)
+    fd_smoothed = smoother.transform(fd)
     
     fig, ax = plt.subplots()
     fd_smoothed.plot(axes = ax, group = [0] * fd_smoothed.size, group_colors = ['grey'], alpha = 0.5)
+
+    if fig_name_suffix == None:
+        fig_name_suffix = ''
+
+    if not os.path.isdir(output_folder):
+        os.mkdir(output_folder)
+
+    fig.savefig(output_folder + 'smoothing_' + method + '_' + fig_name_suffix + '.png', bbox_inches = 'tight')
     return fig
 
-
-def draw_smoothing_clusters(fd_whole, df_cluster, genes, 
+def draw_smoothing_clusters(fd_whole, df_cluster, 
                             n_neighbors = 2, bandwidth = 1, 
                             cluster_key = 'clusters_fuzzy', 
-                            output_folder = 'fda_celldrift/figures/'):
+                            output_folder = 'Temporal_CellDrift/figures/'):
 
     clusters = df_cluster[cluster_key].unique()
     fd_mean = fd_whole.mean()
+    genes = list(df_cluster['genes'])
     
     if not os.path.isdir(output_folder):
         os.mkdir(output_folder) 
@@ -293,31 +368,64 @@ def draw_smoothing_clusters(fd_whole, df_cluster, genes,
         fig, ax = plt.subplots()
         knn_fd.plot(axes = ax, group = [0] * fd.size, group_colors = [color], alpha = 0.5)
         fd_mean.plot(axes = ax, group = [0], group_colors = ['black'])
+        plt.xlabel('Timepoint'); plt.ylabel('Contrast Coefficient'); plt.title('Temporal pattern of cluster ' + str(cluster))
         fig.savefig(output_folder + 'knn_smoothing_' + str(cluster) + '.pdf', bbox_inches = 'tight')    
 
         fig, ax = plt.subplots()
         llr_fd.plot(axes = ax, group = [0] * fd.size, group_colors = [color], alpha = 0.5)
         fd_mean.plot(axes = ax, group = [0], group_colors = ['black'])
+        plt.xlabel('Timepoint'); plt.ylabel('Contrast Coefficient'); plt.title('Temporal pattern of cluster ' + str(cluster))
         fig.savefig(output_folder + 'LR_smoothing_' + str(cluster) + '.pdf', bbox_inches = 'tight')    
 
         fig, ax = plt.subplots()
         nw_fd.plot(axes = ax, group = [0] * fd.size, group_colors = [color], alpha = 0.5)
         fd_mean.plot(axes = ax, group = [0], group_colors = ['black'])
+        plt.xlabel('Timepoint'); plt.ylabel('Contrast Coefficient'); plt.title('Temporal pattern of cluster ' + str(cluster))
         fig.savefig(output_folder + 'NW_smoothing_' + str(cluster) + '.pdf', bbox_inches = 'tight')    
 
-def fpca(fd):
-    return 1
+def run_fpca(fd, n_components = 3):
+    # some issues in sklearn
+    fpca_grid = FPCA(n_components = n_components)
+    fpca_grid = fpca_grid.fit(fd)
 
-def anova_test(fd, fd_groups):
-    mild_idx = [i for i in range(len(fd_groups)) if fd_groups[i] == 'infection_mild']
-    severe_idx = [i for i in range(len(fd_groups)) if fd_groups[i] == 'infection_severe']
+    print(fpca_grid)
+    return fpca_grid
 
-    fd_mild = fd[mild_idx]
-    fd_severe = fd[severe_idx]
+def anova_test(fd, fd_groups, perturbations):
+    fd_collections = []
+    mean_vals = {}
+    for perturbation in perturbations:
+        idx = [i for i in range(len(fd_groups)) if perturbation in fd_groups[i]]
+        fd_sub = fd[idx]
+        mean_val = np.mean([np.mean(fd_sub.data_matrix[i]) for i in range(fd_sub.shape[0])])
+        mean_vals[perturbation] = mean_val
+        fd_collections.append(fd_sub)
+        
+    # run one-way anova
+    val, pval = oneway_anova(*fd_collections)
+    return val, pval, mean_vals
 
-    mild_mean = np.mean([np.mean(fd_mild.data_matrix[i]) for i in range(fd_mild.shape[0])])
-    severe_mean = np.mean([np.mean(fd_severe.data_matrix[i]) for i in range(fd_severe.shape[0])])
-    gap = severe_mean - mild_mean
+def run_anova_test(
+    fda_obj, 
+    genes, 
+    cell_type, 
+    perturbations, 
+    reps = None, 
+    ref_perturbation = None, 
+    step_pattern = 'symmetric2', 
+    alternative_pattern = 'asymmetric'
+):
+    df_anova = pd.DataFrame(columns = ['statistics', 'pval'] + ['mean_' + pert for pert in perturbations])
+    for gene in genes:
+        fd, fd_groups = fda_obj.create_fd_types_perts(gene, cell_type, perturbations, reps, ref_perturbation, step_pattern, alternative_pattern)
+        val, pval, mean_vals = anova_test(fd, fd_groups, perturbations)
+        mean_vals_flatten = [mean_vals[i] for i in perturbations]
+        df_anova.loc[gene, :] = [val, pval] + mean_vals_flatten
+    
+    _, fdr = fdrcorrection(list(df_anova['pval']))
+    df_anova['pval_adjusted'] = fdr 
 
-    val, pval = oneway_anova(fd_mild, fd_severe)
-    return val, pval, gap
+    new_cols = ['statistics', 'pval', 'pval_adjusted'] + ['mean_' + pert for pert in perturbations]
+    df_anova = df_anova.loc[:, new_cols]
+
+    return df_anova

@@ -18,6 +18,8 @@ from scipy.stats.distributions import chi2
 import matplotlib.pyplot as plt
 from itertools import combinations
 
+from ._setup import *
+
 logger = logging.getLogger(__name__)
 
 def extract_covar_name(idx_list, key_celltype, key_perturb):
@@ -48,12 +50,59 @@ def extract_covar_name(idx_list, key_celltype, key_perturb):
                                           i.split(':')[0].lstrip(key_celltype + '[T.').rstrip(']') + '-' + i.split(':')[1].split('T.')[1][:-1]]
     return covar_name_describe
 
+def prepare_output(*args):  
+    # load data
+    adata, df_all, df_pairwiseComp_all, n_coeffs,output_dir, suffix, pairwise_contrast_only = args
+
+    # 1. format original output
+    df_pred = df_all.copy()
+    genes = [df_pred['gene'][i] for i in np.arange(df_pred.shape[0]) if i % n_coeffs == 0]
+    coeffs = df_pred['x_label'].values[:n_coeffs]
+
+    adata.uns['celldrift']['coefficient_names'] = coeffs
+    adata.uns['celldrift']['n_coefficients'] = len(coeffs)
+    adata = adata[:, genes].copy() # subset of genes which were fitted successfully using GLM.
+
+    df_mu = pd.DataFrame(index = genes, columns = coeffs, data = np.array(df_pred['mu']).reshape([len(genes), len(coeffs)]))
+    df_sigma = pd.DataFrame(index = genes, columns = coeffs, data = np.array(df_pred['standard err']).reshape([len(genes), len(coeffs)]))
+    df_pvals = pd.DataFrame(index = genes, columns = coeffs, data = np.array(df_pred['pvals']).reshape([len(genes), len(coeffs)]))
+    df_LRT_pval = pd.DataFrame(index = genes, columns = ['LRT_pval'], data = list(df_pred['LRT_pval'][list(range(0, df_pred.shape[0], len(coeffs)))]))
+
+    if not pairwise_contrast_only:
+        df_mu.to_csv(output_dir + 'GLM_output_parameters' + suffix + '.txt', sep = '\t')
+        df_sigma.to_csv(output_dir + 'GLM_output_standard_errors' + suffix + '.txt', sep = '\t')
+        df_pvals.to_csv(output_dir + 'GLM_output_pvals' + suffix + '.txt', sep = '\t')
+        df_LRT_pval.to_csv(output_dir + 'GLM_output_LRT_pvals' + suffix + '.txt', sep = '\t')
+
+    # 2. format pairwise comparison analysis (multiple comparison)
+    n_pairwise_terms = (len(adata.obs[key_perturb].unique()) - 1)  * len(adata.obs[key_celltype].unique())
+    terms = df_pairwiseComp_all.index.values[:n_pairwise_terms]
+    adata.uns['celldrift']['multicomp_terms'] = terms
+
+    df_multicomp_mu = pd.DataFrame(index = genes, columns = terms, data = np.array(df_pairwiseComp_all['mean']).reshape([len(genes), len(terms)]))
+    df_multicomp_SE = pd.DataFrame(index = genes, columns = terms, data = np.array(df_pairwiseComp_all['SE']).reshape([len(genes), len(terms)]))
+    df_multicomp_lci = pd.DataFrame(index = genes, columns = terms, data = np.array(df_pairwiseComp_all['lci']).reshape([len(genes), len(terms)]))
+    df_multicomp_uci = pd.DataFrame(index = genes, columns = terms, data = np.array(df_pairwiseComp_all['uci']).reshape([len(genes), len(terms)]))
+    df_multicomp_pvals = pd.DataFrame(index = genes, columns = terms, data = np.array(df_pairwiseComp_all['p_fdr']).reshape([len(genes), len(terms)]))
+
+    # add information to anndata
+    adata.varm['GLM_raw_mu'] = df_mu.loc[adata.var_names, :].values
+    adata.varm['GLM_raw_sigma'] = df_sigma.loc[adata.var_names, :].values
+    adata.varm['GLM_raw_pvals'] = df_pvals.loc[adata.var_names, :].values
+
+    adata.varm['Contrast_Coefficients_mu'] = df_multicomp_mu.loc[adata.var_names, :].values
+    adata.varm['Contrast_Coefficients_SE'] = df_multicomp_SE.loc[adata.var_names, :].values
+    adata.varm['Contrast_Coefficients_lci'] = df_multicomp_lci.loc[adata.var_names, :].values
+    adata.varm['Contrast_Coefficients_uci'] = df_multicomp_uci.loc[adata.var_names, :].values
+    adata.varm['Contrast_Coefficients_pvals'] = df_multicomp_pvals.loc[adata.var_names, :].values
+    
+    adata.var['LRT_pvals'] = df_LRT_pval['LRT_pval']
+    return adata
 
 def LRT(L1, L2):
     LR = abs(2*(L1-L2))
     p = chi2.sf(LR, 7)
     return p
-
 
 def emmeans(df_input, betas, v, key_cell, key_perturb, ctrl):
     '''
@@ -179,7 +228,6 @@ def glm_gene_chunk(genes, df_input, adjust_batch = True, add_dummy = True):
     # add dummy values
     if add_dummy:
         1
-    # xxx
 
     df_output_chunk = pd.DataFrame()
     df_pairwiseComp_chunk = pd.DataFrame()
@@ -212,13 +260,15 @@ def glm_gene_chunk(genes, df_input, adjust_batch = True, add_dummy = True):
                                         offset = np.log(df_input[key_size_factor]), 
                                         data = df_input,
                                         family = sm.families.NegativeBinomial()).fit()
-            logger.info('Success for gene: ' + gene)
         except:
             logger.info('GLM can not be fitted for gene: ' + gene)
             continue
         
         # likelihood ratio test
-        covariates_cp = [i for i in glm_result.params.index.values if (key_batch not in i)]
+        if adjust_batch:
+            covariates_cp = [i for i in glm_result.params.index.values if (key_batch not in i)]
+        else:
+            covariates_cp = list(glm_result.params.index.values)
 
         L1 = glm_result.llf
         L2 = glm_ref_result.llf
@@ -227,6 +277,7 @@ def glm_gene_chunk(genes, df_input, adjust_batch = True, add_dummy = True):
         # add multiple comparison here
         betas = glm_result.params
         betas = betas[covariates_cp]
+        
         try:
             v = glm_result.cov_params()
         except:
@@ -273,7 +324,7 @@ def glm_gene_chunk(genes, df_input, adjust_batch = True, add_dummy = True):
     return df_output_chunk, df_pairwiseComp_chunk
 
 
-def model_genes(adata, gene_selection = 'all', n_processes = 16, chunksize = 100, adjust_batch = True, add_dummy = True, pairwise_contrast_only = False, output_suffix = None):
+def model_genes(adata, n_processes = 16, chunksize = 100, adjust_batch = True, add_dummy = True, pairwise_contrast_only = False, output_suffix = None):
     '''
     Build a model for each gene and curate predictions from iterations.
     Multiprocessing is used here.
@@ -282,17 +333,15 @@ def model_genes(adata, gene_selection = 'all', n_processes = 16, chunksize = 100
     ----------
     adata
         anndata
-    gene_selection
-        Whether to select all genes or not
     n_processes
         number of processes to be used
     '''
 
     # initialization
 
-    logger.info('Start to run the model.')
-    logger.info('Number of processes: ' + str(n_processes))
-    logger.info('Chunksize: ' + str(chunksize))
+    logger.info('---Step2: Start to run the model.')
+    logger.info('---Step2: Number of processes: ' + str(n_processes))
+    logger.info('---Step2: Chunksize: ' + str(chunksize))
 
     global key_celltype; global key_perturb; global key_size_factor; global key_batch; global group_control
     
@@ -301,20 +350,22 @@ def model_genes(adata, gene_selection = 'all', n_processes = 16, chunksize = 100
     key_size_factor = adata.uns['celldrift']['size_factor_key']    
     key_batch = adata.uns['celldrift']['batch_key']  
     group_control = adata.uns['celldrift']['group_control']
-    n_coeffs = adata.uns['celldrift']['n_coefficients']  
+    n_coeffs = len(adata.obs[key_perturb].unique())  * len(adata.obs[key_celltype].unique())
     output_dir = adata.uns['celldrift']['output_dir']
 
-    if gene_selection == 'all':
-        genes = adata.var.index.values
-        n_genes = len(genes)
+    genes = adata.var.index.values
+    n_genes = len(genes)
 
-    df_meta =  adata.obs[[key_celltype,key_perturb, key_size_factor, key_batch]].copy() # extract cell type and perturbation columns 
+    if key_batch == None:
+        df_meta =  adata.obs[[key_celltype,key_perturb, key_size_factor]].copy() # extract cell type and perturbation columns 
+    else:
+        df_meta =  adata.obs[[key_celltype,key_perturb, key_size_factor, key_batch]].copy() # extract cell type and perturbation columns 
 
     # batch (batch preparation is to avoid large dense tables)
     batch_size = n_processes * chunksize # 800 or 1600
     final_batches = []
     for batch_idx in range(0, n_genes, batch_size):
-        logger.info('Start to run batch: ' + str(batch_idx))
+        logger.info('---Step2: Start to run batch: ' + str(batch_idx))
         
         # prepare huge expression table for all chunks in one batch
         genes_idx_batch = range(batch_idx, min(batch_idx + batch_size, n_genes))
@@ -323,7 +374,7 @@ def model_genes(adata, gene_selection = 'all', n_processes = 16, chunksize = 100
                                     index = adata.obs.index.values,
                                     columns = genes_batch)
         df_batch_input = pd.concat([df_meta, df_batch_expr], axis = 1)
-        logger.info('Size of input table: ' + str(sys.getsizeof(df_batch_input) / (1024*1024)) + ' Mb.')
+        logger.info('---Step2: Size of input table: ' + str(sys.getsizeof(df_batch_input) / (1024*1024)) + ' Mb.')
 
         # separate batch table into chunks
         genes_chunks = []
@@ -341,7 +392,7 @@ def model_genes(adata, gene_selection = 'all', n_processes = 16, chunksize = 100
         pool.close()
         pool.join()
 
-        logger.info('Size of outcome of apply: ' + str(len(out)))
+        logger.info('---Step2: Size of outcome of apply: ' + str(len(out)))
         final = []
 
         for collect in out:
@@ -353,10 +404,10 @@ def model_genes(adata, gene_selection = 'all', n_processes = 16, chunksize = 100
         final = ray.get(futures)
         '''
         final_batches += final
-        logger.info('Finish batch: ' + str(batch_idx))
+        logger.info('---Step2: Finish batch: ' + str(batch_idx))
 
     # concatenate results
-    logger.info('Start to format modeling output')
+    logger.info('---Step2: Start to format modeling output')
     df_all = pd.DataFrame()
     df_pairwiseComp_all = pd.DataFrame()
 
@@ -366,56 +417,20 @@ def model_genes(adata, gene_selection = 'all', n_processes = 16, chunksize = 100
     
     suffix = '' if output_suffix == None else output_suffix
 
-    df_all.to_csv(output_dir + 'glm_predictions' + suffix + '.txt', sep = '\t')
-    df_pairwiseComp_all.to_csv(output_dir + 'glm_predictions_pairwise_comparisons' + suffix + '.txt', sep = '\t')
+    df_all.to_csv(output_dir + 'GLM_output' + suffix + '.txt', sep = '\t')
+    df_pairwiseComp_all.to_csv(output_dir + 'Contrast_Coefficients' + suffix + '.txt', sep = '\t')
     
-    df_pred = df_all.copy()
-    genes = [df_pred['gene'][i] for i in np.arange(df_pred.shape[0]) if i % n_coeffs == 0]
-    coeffs = df_pred['x_label'].values[:n_coeffs]
-    adata.uns['celldrift']['coefficient_names'] = coeffs
-    adata = adata[:, genes].copy() # subset of genes which were fitted successfully using GLM.
-
-    df_mu = pd.DataFrame(index = genes, columns = coeffs, data = np.array(df_pred['mu']).reshape([len(genes), len(coeffs)]))
-    df_sigma = pd.DataFrame(index = genes, columns = coeffs, data = np.array(df_pred['standard err']).reshape([len(genes), len(coeffs)]))
-    df_pvals = pd.DataFrame(index = genes, columns = coeffs, data = np.array(df_pred['pvals']).reshape([len(genes), len(coeffs)]))
-    df_LRT_pval = pd.DataFrame(index = genes, columns = ['LRT_pval'], data = list(df_pred['LRT_pval'][list(range(0, df_pred.shape[0], len(coeffs)))]))
-
-    if not pairwise_contrast_only:
-        df_mu.to_csv(output_dir + 'glm_predictions_parameters' + suffix + '.txt', sep = '\t')
-        df_sigma.to_csv(output_dir + 'glm_predictions_standard_errors' + suffix + '.txt', sep = '\t')
-        df_pvals.to_csv(output_dir + 'glm_predictions_pvals' + suffix + '.txt', sep = '\t')
-        df_LRT_pval.to_csv(output_dir + 'glm_predictions_LRT_pvals' + suffix + '.txt', sep = '\t')
-
-    # select specific perturbation comparisons
-    # terms = []
-    # for celltype in np.unique(df_input[key_celltype]):
-    #     term_name = celltype + '_' + group_perturb + '-' + celltype + '_' + group_control
-    #     terms.append(term_name)
-    n_pairwise_terms = adata.uns['celldrift']['n_cell_types'] * (adata.uns['celldrift']['n_perturbations'] - 1)
-    terms = df_pairwiseComp_all.index.values[:n_pairwise_terms]
-    adata.uns['celldrift']['multicomp_terms'] = terms
-
-    df_multicomp_mu = pd.DataFrame(index = genes, columns = terms, data = np.array(df_pairwiseComp_all['mean']).reshape([len(genes), len(terms)]))
-    df_multicomp_SE = pd.DataFrame(index = genes, columns = terms, data = np.array(df_pairwiseComp_all['SE']).reshape([len(genes), len(terms)]))
-    df_multicomp_lci = pd.DataFrame(index = genes, columns = terms, data = np.array(df_pairwiseComp_all['lci']).reshape([len(genes), len(terms)]))
-    df_multicomp_uci = pd.DataFrame(index = genes, columns = terms, data = np.array(df_pairwiseComp_all['uci']).reshape([len(genes), len(terms)]))
-    df_multicomp_pvals = pd.DataFrame(index = genes, columns = terms, data = np.array(df_pairwiseComp_all['p_fdr']).reshape([len(genes), len(terms)]))
-
-    # add information to anndata
-    adata.varm['pred_mu'] = df_mu.loc[adata.var_names, :].values
-    adata.varm['pred_sigma'] = df_sigma.loc[adata.var_names, :].values
-    adata.varm['pred_pvals'] = df_pvals.loc[adata.var_names, :].values
-
-    adata.varm['multicomp_mu'] = df_multicomp_mu.loc[adata.var_names, :].values
-    adata.varm['multicomp_SE'] = df_multicomp_SE.loc[adata.var_names, :].values
-    adata.varm['multicomp_lci'] = df_multicomp_lci.loc[adata.var_names, :].values
-    adata.varm['multicomp_uci'] = df_multicomp_uci.loc[adata.var_names, :].values
-    adata.varm['multicomp_pvals'] = df_multicomp_pvals.loc[adata.var_names, :].values
-    
-    adata.var['LRT_pvals'] = df_LRT_pval['LRT_pval']
-
+    # write / append pairwise comparison results 
+    adata = prepare_output(
+        adata,
+        df_all, 
+        df_pairwiseComp_all, 
+        n_coeffs,
+        output_dir, 
+        suffix, 
+        pairwise_contrast_only
+    )
     return adata
-
 
 def model_selection(adata, pval_LRT = 0.05, pval_multicomp = 0.05):
     '''
@@ -424,14 +439,14 @@ def model_selection(adata, pval_LRT = 0.05, pval_multicomp = 0.05):
     # categorize genes using 
     df_genes = adata.var.copy()
 
-    df_multicomp_pvals = pd.DataFrame(data = adata.varm['multicomp_pvals'], 
+    df_multicomp_pvals = pd.DataFrame(data = adata.varm['Contrast_Coefficients_pvals'], 
                                     index = adata.var_names, 
                                     columns = adata.uns['celldrift']['multicomp_terms'])
 
     genes_perturbed = df_multicomp_pvals.index.values[np.min(df_multicomp_pvals, axis = 1) < pval_multicomp]
     genes_perturbed_AcrossTypes = df_genes.loc[df_genes['LRT_pvals'] < pval_LRT, :].index.values
-    logger.info('Number of perturbed genes: ' + str(len(genes_perturbed)))
-    logger.info('Number of genes perturbed differently across cell types: ' + str(len(genes_perturbed_AcrossTypes)))
+    logger.info('---Step2: Number of perturbed genes: ' + str(len(genes_perturbed)))
+    logger.info('---Step2: Number of genes perturbed differently across cell types: ' + str(len(genes_perturbed_AcrossTypes)))
 
     adata.var['perturbed_genes'] = 0
     adata.var['differentially_perturbed_genes'] = 0
@@ -440,39 +455,15 @@ def model_selection(adata, pval_LRT = 0.05, pval_multicomp = 0.05):
 
     return adata
 
-def model_timescale(adata, **kwargs):
-    '''
-    run the GLM model across multiple time points. Also refer to model_genes to see model for one time point.
+def organize_output(rep_id, output_folder):
+    output_files = [i for i in os.listdir(output_folder) if (i.startswith('Contrast_Coefficients_time'))]
 
-    Parameters
-    ----------
-    adata
-        CellDrift anndata
-    **kwargs
-        model_genes proporties
-    '''
-    time_key = adata.uns['celldrift']['time_key']
-    time_points = adata.obs[time_key].unique()
-    output_dir = adata.uns['celldrift']['output_dir']
-
-    for time in time_points:
-        time_val = str(np.round(time,2))
-        logger.info('Run GLM model for time point ' + time_val)
-        adata_time = adata[adata.obs[time_key] == time, : ].copy()
-        adata_time = model_genes(adata_time, output_suffix = '_time_' + time_val, **kwargs)
-        adata_time = model_selection(adata_time)
-        adata_time.write(output_dir + 'time_' + time_val + '.h5ad')
-        
-
-def organize_output(output_folder = 'output_celldrift/', suffix = ''):
-    output_files = [i for i in os.listdir(output_folder) if (i.startswith('glm_predictions_pairwise_comparisons_'))]
-
-    df_meta = pd.DataFrame(columns = ['time', 'perturbation', 'cell_type'])
+    df_meta = pd.DataFrame(columns = ['rep', 'time', 'perturbation', 'cell_type'])
     
     for idx, output_file in enumerate(tqdm(output_files)):    
         # get basic information
         df_pairwise = pd.read_csv(output_folder + output_file, sep = '\t', header = 0)
-        time = output_file.split('glm_predictions_pairwise_comparisons_time_')[1].split('.txt')[0]
+        time = output_file.split('Contrast_Coefficients_time_')[1].split('.txt')[0]
         
         n_types = len(np.unique(df_pairwise['cell_type']))
         n_perts = len(np.unique(df_pairwise['perturbation']))
@@ -483,7 +474,7 @@ def organize_output(output_folder = 'output_celldrift/', suffix = ''):
         coeff_vals = df_pairwise['zscore'].values.reshape([n_genes, n_types * n_perts])
 
         genes = list(df_pairwise.sort_values(by = ['cell_type', 'perturbation', 'gene'])['gene'][ : n_genes])
-        contrasts = [(time + '_' + i) for i in list(df_pairwise['contrast'][ : n_types * n_perts])]
+        contrasts = [('rep' + str(rep_id) + '_' + time + '_' + i) for i in list(df_pairwise['contrast'][ : n_types * n_perts])]
         avail_types = [(i.split('\',')[0].split('(\'')[1]) for i in list(df_pairwise['cell_type'][:(n_types * n_perts)])]
         avail_perts = [(i.split('\',')[0].split('(\'')[1]) for i in list(df_pairwise['perturbation'][:(n_types * n_perts)])]
         
@@ -495,9 +486,81 @@ def organize_output(output_folder = 'output_celldrift/', suffix = ''):
             df_combined = pd.concat([df_combined, df_graph], axis = 1, join = 'outer')
         
         for contrast, cell_type, pert in zip(contrasts, avail_types, avail_perts):
-            df_meta.loc[contrast, : ] =  [time, pert, cell_type]
+            df_meta.loc[contrast, : ] =  [rep_id, time, pert, cell_type]
 
-    df_combined.to_csv('fda_celldrift/pairwise_zscores_combined_' + suffix + '.txt', sep = '\t')
-    df_meta.to_csv('fda_celldrift/pairwise_contrasts_metadata_' + suffix + '.txt', sep = '\t')
+    df_combined.values[np.isnan(df_combined.values)] = 0 # remove nan values in the output
 
     return df_combined, df_meta
+
+def model_timescale(adata, n_processes = 16, chunksize = 100, adjust_batch = True, add_dummy = True, pairwise_contrast_only = False, output_suffix = None):
+    '''
+    run the GLM model across multiple time points. Also refer to model_genes to see model for one time point.
+
+    Parameters
+    ----------
+    adata
+        CellDrift anndata
+    **kwargs
+        model_genes proporties
+    '''
+    # initialization
+    time_key = adata.uns['celldrift']['time_key']
+    pert_key = adata.uns['celldrift']['perturb_key']
+    ctrl_name = adata.uns['celldrift']['group_control']
+    time_points = adata.obs[time_key].unique()
+    time_points = np.setdiff1d(time_points, [''])
+    output_dir = adata.uns['celldrift']['output_dir']
+    temporal_dir = adata.uns['celldrift']['temporal_dir']
+    n_reps = adata.uns['celldrift']['n_reps']
+    key_reps = adata.uns['celldrift']['rep_key']
+    df_meta = adata.obs.copy()
+
+    suffix = '' if output_suffix == None else output_suffix
+
+    # run GLM for each replicates
+    df_zscores = pd.DataFrame(index = adata.var.index.values)
+    df_zscores_metadata = pd.DataFrame()
+
+    for rep_id, rep_name in enumerate(tqdm(key_reps)):
+        logger.info('------------------------------------------------')
+        logger.info('---Step2: Run GLM model for replicate ' + str(rep_id + 1))
+        cells_rep = df_meta.loc[df_meta[rep_name] == True, :].index.values
+        adata_rep = adata[cells_rep, :].copy()
+
+        output_dir_rep = output_dir + rep_name + '/'
+        if not os.path.isdir(output_dir + rep_name):
+            os.mkdir(output_dir + rep_name)
+        adata_rep.uns['celldrift']['output_dir'] = output_dir_rep
+        adata_rep = update_celldrift(adata_rep)
+
+        # run GLM for each time points
+        # for time in tqdm(time_points):
+        for time in time_points:
+            logger.info('---Step2: Run GLM model for time point ' + str(time))
+
+            adata_time = adata_rep[(adata_rep.obs[time_key] == time) | (adata_rep.obs[pert_key] == ctrl_name), : ].copy()
+            adata_time = update_celldrift(adata_time)
+            adata_time = model_genes(
+                adata_time, 
+                n_processes, 
+                chunksize, 
+                adjust_batch, 
+                add_dummy, 
+                pairwise_contrast_only, 
+                output_suffix = '_time_' + str(time)
+            ) # GLM
+            adata_time = model_selection(adata_time) # LRT
+            adata_time.write(output_dir_rep + 'CellDrift_object_time_' + str(time) + '.h5ad')
+
+        # organize the output
+        df_zscores_rep, df_zscores_metadata_rep = organize_output(
+            rep_id = rep_id + 1, 
+            output_folder = output_dir_rep
+        )
+        df_zscores_rep.to_csv(output_dir_rep + 'Contrast_Coefficients_combined_zscores_' + suffix + '.txt', sep = '\t')
+        df_zscores = pd.concat([df_zscores, df_zscores_rep], axis = 1, join = 'inner')
+        df_zscores_metadata = pd.concat([df_zscores_metadata, df_zscores_metadata_rep], axis = 0)
+
+    # write output files
+    df_zscores.to_csv(temporal_dir + 'Contrast_Coefficients_combined_zscores_' + suffix + '.txt', sep = '\t')
+    df_zscores_metadata.to_csv(temporal_dir + 'Contrast_Coefficients_combined_metadata_' + suffix + '.txt', sep = '\t')

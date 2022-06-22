@@ -33,6 +33,7 @@ pip install .
 ### Quick Start
 ```python
 import numpy as np
+import pandas as pd
 import scanpy as sc
 import CellDrift as ct
 ```
@@ -54,6 +55,9 @@ adata = ct.setup_celldrift(
     perturb_name = None, 
     size_factor_key = 'size_factor', 
     batch_key = 'batch', 
+    n_reps = 3,
+    n_cells_perBlock = 100,
+    use_pseudotime = False,
     min_cells_perGene = 0
 )
 ```
@@ -63,7 +67,7 @@ adata = ct.setup_celldrift(
 adata = ct.model_timescale(
     adata, 
     n_processes = 16, # number of processes for multiprocessing
-    chunksize = 60, # number of genes in each chunk
+    chunksize = 100, # number of genes in each chunk
     pairwise_contrast_only = True, 
     adjust_batch = False
 )
@@ -76,8 +80,8 @@ ct.organize_output(output_folder = 'output_celldrift/')
 
 #### 5. set up FDA object
 ```python
-df_zscore = pd.read_csv('fda_celldrift/pairwise_zscores_combined_.txt', sep = '\t', header = 0, index_col = 0)
-df_meta = pd.read_csv('fda_celldrift/pairwise_contrasts_metadata_.txt', sep = '\t', header = 0, index_col = 0)
+df_zscore = pd.read_csv('Temporal_CellDrift/Contrast_Coefficients_combined_zscores_.txt', sep = '\t', header = 0, index_col = 0) # CellDrift z scores
+df_meta = pd.read_csv('Temporal_CellDrift/Contrast_Coefficients_combined_metadata_.txt', sep = '\t', header = 0, index_col = 0) # metadata of contrast comparisons
 
 fda = ct.FDA(df_zscore, df_meta)
 ```
@@ -90,14 +94,12 @@ df_cluster = ct.fda_cluster(fd, genes, n_clusters = 3)
 
 #### 7. visualization for each temporal cluster
 ```python
-genes = df_zscore.index.values
 ct.draw_smoothing_clusters(
     fd, 
     df_cluster, 
-    genes = genes, 
     n_neighbors = 2, 
-    bandwidth = 1, 
+    bandwidth = 1,
     cluster_key = 'clusters_fuzzy', 
-    output_folder = 'fda_celldrift/figures/'
+    output_folder = 'Temporal_CellDrift/cluster_fuzzy/'
 )
 ```
