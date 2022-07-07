@@ -8,7 +8,7 @@ long_description = '\n\n'.join([open(os.path.join(base_dir,'README.md'),'r').rea
 
 setup(
     name = 'CellDrift',
-    version = '0.1.1',
+    version = '0.1.2',
     description = 'CellDrift: A Python Package to Infer Temporal Patterns of Peturbation Effects in Single Cell Data',
     author = 'Kang Jin',
     author_email = 'jinkg@mail.uc.edu',
