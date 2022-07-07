@@ -13,6 +13,8 @@ setup(
     author = 'Kang Jin',
     author_email = 'jinkg@mail.uc.edu',
     maintainer = 'Kang Jin',
+    long_description = long_description,
+    long_description_content_type = 'text/markdown',
     url = 'https://github.com/KANG-BIOINFO/CellDrift',
     packages = find_packages(),
     install_requires = [
