@@ -20,6 +20,7 @@ from statsmodels.stats.multitest import fdrcorrection
 mpl.rcParams['pdf.fonttype'] = 42
 mpl.rcParams['ps.fonttype'] = 42
 mpl.rcParams['font.family'] = 'Arial'
+mpl.rcParams.update({'font.size': 18})
 
 # create default cmap
 def create_cmap(cmap_name, cmap_list):
@@ -322,7 +323,8 @@ def draw_smoothing(fd, method = 'nw', n_neighbors = 2, bandwidth = 1,
 def draw_smoothing_clusters(fd_whole, df_cluster, 
                             n_neighbors = 2, bandwidth = 1, 
                             cluster_key = 'clusters_fuzzy', 
-                            output_folder = 'Temporal_CellDrift/figures/'):
+                            output_folder = 'Temporal_CellDrift/figures/',
+                            ylim = None):
 
     clusters = df_cluster[cluster_key].unique()
     fd_mean = fd_whole.mean()
@@ -369,18 +371,21 @@ def draw_smoothing_clusters(fd_whole, df_cluster,
         knn_fd.plot(axes = ax, group = [0] * fd.size, group_colors = [color], alpha = 0.5)
         fd_mean.plot(axes = ax, group = [0], group_colors = ['black'])
         plt.xlabel('Timepoint'); plt.ylabel('Contrast Coefficient'); plt.title('Temporal pattern of cluster ' + str(cluster))
+        if ylim != None: plt.ylim(ylim[0], ylim[1])
         fig.savefig(output_folder + 'knn_smoothing_' + str(cluster) + '.pdf', bbox_inches = 'tight')    
 
         fig, ax = plt.subplots()
         llr_fd.plot(axes = ax, group = [0] * fd.size, group_colors = [color], alpha = 0.5)
         fd_mean.plot(axes = ax, group = [0], group_colors = ['black'])
         plt.xlabel('Timepoint'); plt.ylabel('Contrast Coefficient'); plt.title('Temporal pattern of cluster ' + str(cluster))
+        if ylim != None: plt.ylim(ylim[0], ylim[1])
         fig.savefig(output_folder + 'LR_smoothing_' + str(cluster) + '.pdf', bbox_inches = 'tight')    
 
         fig, ax = plt.subplots()
         nw_fd.plot(axes = ax, group = [0] * fd.size, group_colors = [color], alpha = 0.5)
         fd_mean.plot(axes = ax, group = [0], group_colors = ['black'])
         plt.xlabel('Timepoint'); plt.ylabel('Contrast Coefficient'); plt.title('Temporal pattern of cluster ' + str(cluster))
+        if ylim != None: plt.ylim(ylim[0], ylim[1])
         fig.savefig(output_folder + 'NW_smoothing_' + str(cluster) + '.pdf', bbox_inches = 'tight')    
 
 def run_fpca(fd, n_components = 3):
