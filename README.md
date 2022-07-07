@@ -1,4 +1,4 @@
-[![Pypi](https://img.shields.io/pypi/v/CellDrift?logo=PyPI)](https://pypi.org/project/CellDrift/)  [![Downloads](https://pepy.tech/badge/CellDrift)](https://pypi.org/project/CellDrift/)  [![Stars](https://img.shields.io/github/stars/KANG-BIOINFO/CellDrift)](https://github.com/KANG-BIOINFO/CellDrift/stargazers)
+[![Pypi](https://img.shields.io/pypi/v/CellDrift?logo=PyPI)](https://pypi.org/project/CellDrift/)  [![Stars](https://img.shields.io/github/stars/KANG-BIOINFO/CellDrift)](https://github.com/KANG-BIOINFO/CellDrift/stargazers)
 
 # CellDrift
 CellDrift: temporal perturbation effects for single cell data
