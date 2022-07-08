@@ -1,8 +1,6 @@
 API
 ----------------
 
-The test module contains .....
-
 setup_celldrift
 ~~~~~~~~~~~~~~~~~
 .. autofunction:: CellDrift._setup.setup_celldrift
