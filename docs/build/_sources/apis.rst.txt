@@ -1,6 +1,8 @@
 API
 ----------------
 
+API commands in CellDrift
+
 setup_celldrift
 ~~~~~~~~~~~~~~~~~
 .. autofunction:: CellDrift._setup.setup_celldrift
