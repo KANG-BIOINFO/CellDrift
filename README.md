@@ -22,9 +22,7 @@ pip install git+https://github.com/GAA-UAM/scikit-fda.git
 
 ### Installation
 ```python
-git clone https://github.com/KANG-BIOINFO/CellDrift.git
-cd CellDrift
-pip install .
+pip install CellDrift
 ```
 
 ### Tutorial

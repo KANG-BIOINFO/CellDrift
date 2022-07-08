@@ -16,6 +16,4 @@ Installation
 ------------
 Install CellDrift package::
 
-    git clone https://github.com/KANG-BIOINFO/CellDrift.git
-    cd CellDrift
-    pip install .
+    pip install CellDrift
