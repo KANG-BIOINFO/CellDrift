@@ -1,4 +1,4 @@
-[![Pypi](https://img.shields.io/pypi/v/CellDrift?logo=PyPI)](https://pypi.org/project/CellDrift/)  [![Stars](https://img.shields.io/github/stars/KANG-BIOINFO/CellDrift)](https://github.com/KANG-BIOINFO/CellDrift/stargazers)
+[![Documentation Status](https://readthedocs.org/projects/celldrift/badge/?version=latest)](https://celldrift.readthedocs.io/en/latest/index.html) [![Pypi](https://img.shields.io/pypi/v/CellDrift?logo=PyPI)](https://pypi.org/project/CellDrift/)  [![Stars](https://img.shields.io/github/stars/KANG-BIOINFO/CellDrift)](https://github.com/KANG-BIOINFO/CellDrift/stargazers)
 
 # CellDrift
 CellDrift: temporal perturbation effects for single cell data
@@ -30,6 +30,7 @@ pip install .
 ### Tutorial
 - [Example on HIV Infection Study](https://github.com/KANG-BIOINFO/CellDrift/blob/main/Tutorial/hiv_infection_tutorial.md)
 - [Example on Pseudo-time Data of Brain Organoid Development](https://github.com/KANG-BIOINFO/CellDrift/blob/main/Tutorial/brain_pseudotime_tutorial.md)
+- [Check the complete Document](https://celldrift.readthedocs.io/en/latest/index.html)
 
 ### Quick Start
 ```python
@@ -74,12 +75,7 @@ adata = ct.model_timescale(
 )
 ```
 
-#### 4. Organize the output for functional data analysis (FDA)
-```python
-ct.organize_output(output_folder = 'output_celldrift/')
-```
-
-#### 5. set up FDA object
+#### 4. set up FDA object
 ```python
 df_zscore = pd.read_csv('Temporal_CellDrift/Contrast_Coefficients_combined_zscores_.txt', sep = '\t', header = 0, index_col = 0) # CellDrift z scores
 df_meta = pd.read_csv('Temporal_CellDrift/Contrast_Coefficients_combined_metadata_.txt', sep = '\t', header = 0, index_col = 0) # metadata of contrast comparisons
@@ -87,13 +83,13 @@ df_meta = pd.read_csv('Temporal_CellDrift/Contrast_Coefficients_combined_metadat
 fda = ct.FDA(df_zscore, df_meta)
 ```
 
-#### 6. temporal clustering
+#### 5. temporal clustering
 ```python
 fd, genes = fda.create_fd_genes(genes = df_zscore.index.values, cell_type = 'Type_0', perturbation = 'Perturb_0')
 df_cluster = ct.fda_cluster(fd, genes, n_clusters = 3)
 ```
 
-#### 7. visualization for each temporal cluster
+#### 6. visualization for each temporal cluster
 ```python
 ct.draw_smoothing_clusters(
     fd, 
