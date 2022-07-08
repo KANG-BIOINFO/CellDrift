@@ -1,6 +1,10 @@
 API
 ----------------
 
+The test module contains ..
+
+.. currentmodule:: _model
+
 setup_celldrift
 ~~~~~~~~~~~~~~~~
 .. autofunction:: CellDrift._setup.setup_celldrift
