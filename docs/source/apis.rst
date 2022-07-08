@@ -1,11 +1,11 @@
 API
 ----------------
 
-The test module contains ..,
+The test module contains ....
 
 .. automodule:: _model
 
-setup_celldrift.
+setup_celldrift
 ~~~~~~~~~~~~~~~~
 .. autofunction:: CellDrift._setup.setup_celldrift
 
