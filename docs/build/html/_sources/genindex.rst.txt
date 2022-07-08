@@ -1,4 +1,0 @@
-Index
-=====
-
-An index page.
