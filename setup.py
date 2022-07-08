@@ -16,6 +16,9 @@ setup(
     long_description = long_description,
     long_description_content_type = 'text/markdown',
     url = 'https://github.com/KANG-BIOINFO/CellDrift',
+    project_urls={
+        'Ducumentation':'https://celldrift.readthedocs.io/en/latest/index.html#',
+    },
     packages = find_packages(),
     install_requires = [
         'numpy',

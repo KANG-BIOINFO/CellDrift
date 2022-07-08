@@ -4,7 +4,7 @@ Introduction
 .. _narrative_background:
 
 Why do we develop CellDrift?
--------------------------
+------------------------------
 Researchers have applied the single-cell RNA-sequencing technology in experiments with perturbation settings such as diseases, treatments, genetic mutations, and organ differentiation to explore transcriptional profiles across various biochemical states. 
 
 The response to perturbation can vary over time, which is overlooked in many single cell studies. As a result, we develop CellDrift, a generalized linear model-based functional data analysis method capable of identifying covarying temporal patterns of various cell types in response to perturbations. It includes functions below:
