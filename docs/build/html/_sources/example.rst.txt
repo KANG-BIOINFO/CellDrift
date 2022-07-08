@@ -9,8 +9,9 @@ HIV Infection Study
 This is an example of the CellDrift application in a longitudinal HIV-1 hyperacute infection study.
 This scRNA-seq data covers peripheral blood mononuclear cells from untreated individuals with HIV infections before and after acute infection. Longitudinal samples were collected from these patients from week 0 to year 1 post-infection. Multiple cell types involved in immune responses were annotated and analyzed. The data was downloaded from single cell portal SCP256.
 
-We first prepare the input data.
->>> import numpy as np
+We first prepare the input data::
+
+    import numpy as np
     import pandas as pd
     import scanpy as sc
     import CellDrift as ct
@@ -36,8 +37,9 @@ We first prepare the input data.
     S00004    B cell  P3_4 Weeks  1402  HIV infectious disease  4 Weeks       28        hiv
     S00005    B cell  P3_4 Weeks  1179  HIV infectious disease  4 Weeks       28        hiv
 
-It is recommended to do the feature selection. The reason for feature selection is to investigate the most interesting genes and to reduce running time.
->>> # select highly variable genes
+It is recommended to do the feature selection. The reason for feature selection is to investigate the most interesting genes and to reduce running time::
+
+    # select highly variable genes
     def select_variable_genes(data, n_top_genes):
         # normalize raw data
         sc.pp.filter_genes(data, min_cells = 200)
@@ -52,8 +54,8 @@ It is recommended to do the feature selection. The reason for feature selection 
     high_var_genes = select_variable_genes(adata.copy(), n_top_genes = 1200)
     adata = adata[:, high_var_genes].copy()
 
-Then we set up the CellDrift object, which is a basic format with necessary information for downsteam analysis.
-.. code-block:: 
+Then we set up the CellDrift object, which is a basic format with necessary information for downsteam analysis::
+
     adata = ct.setup_celldrift(
         adata, 
         cell_type_key = kc, 
@@ -69,8 +71,8 @@ Then we set up the CellDrift object, which is a basic format with necessary info
         min_cells_perGene = 200
     )
 
-After we get the CellDrift object in a required format, we run the generalized linear model across input time points.
-.. code-block:: 
+After we get the CellDrift object in a required format, we run the generalized linear model across input time points::
+
     adata = ct.model_timescale(
         adata, 
         n_processes = 8, # number of processes for multiprocessing
@@ -78,10 +80,11 @@ After we get the CellDrift object in a required format, we run the generalized l
         pairwise_contrast_only = True, 
         adjust_batch = False
     )
+
 The output of generalized linear model is stored in the folder ``Coefficients_CellDrift``
 
-We load the contrast coefficients (z scores) from the last step and then build up a ``FDA`` object.
-.. code-block::
+We load the contrast coefficients (z scores) from the last step and then build up a ``FDA`` object::
+
     # load data
     df_zscore = pd.read_csv('Temporal_CellDrift/Contrast_Coefficients_combined_zscores_.txt', sep = '\t', header = 0, index_col = 0)
     df_meta = pd.read_csv('Temporal_CellDrift/Contrast_Coefficients_combined_metadata_.txt', sep = '\t', header = 0, index_col = 0)
@@ -98,8 +101,8 @@ We load the contrast coefficients (z scores) from the last step and then build u
     perturbation = 'hiv'
     fda = ct.FDA(df_zscore, df_meta)
 
-We then do the temporal clustering on the ``FDA`` object. 
-.. code-block:: 
+We then do the temporal clustering on the ``FDA`` object::
+
     # find clusters
     input_genes = df_zscore.index.values
     fd1, genes = fda.create_fd_genes(input_genes, cell_type = cell_type, perturbation = perturbation)
