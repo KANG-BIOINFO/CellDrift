@@ -1,12 +1,8 @@
 numpy
 pandas
 scanpy>=1.6.0
-tqdm
-pasty
+matplotlib
+seaborn
 scipy
 statsmodels
-matplotlib
-random
-anndata
 dtw
-skfda

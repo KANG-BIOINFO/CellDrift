@@ -1,7 +1,7 @@
 API
 ----------------
 
-API commands in CellDrift
+API commands in CellDrift.
 
 setup_celldrift
 ~~~~~~~~~~~~~~~~~
