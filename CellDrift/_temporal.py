@@ -279,7 +279,14 @@ class FDA:
 def fda_cluster(fd, genes, n_clusters = 20, seed = 42, suffix = '', output_folder = 'Temporal_CellDrift/'):
     
     '''
-    Find functional data analysis clusters
+    Find functional data analysis clusters.
+
+    :param fd: FDA object.
+    :param genes: genes used to run clustering algorithms.
+    :param n_clusters: number of clusters. Default is 20.
+    :param seed: random seed. Default is 42.
+    :param suffix: suffix in the name of output file.
+    :param output_folder: location of output folder.
     '''
 
     # run clustering methods
@@ -301,6 +308,16 @@ def fda_cluster(fd, genes, n_clusters = 20, seed = 42, suffix = '', output_folde
 
 def draw_smoothing(fd, method = 'nw', n_neighbors = 2, bandwidth = 1,
                     output_folder = 'Figures_CellDrift/', fig_name_suffix = None):
+    '''
+    Draw a smoothed curve for functional data.
+
+    :param fd: FDA object, such as the FDA object for all cell-type+perturbation combinations in a specific gene.
+    :param method: method of smoothing, including knn, llr and nw. Default is nw
+    :param n_neighbors: number of neighbors for Kernel Smoothing method KNeighborsHatMatrix. Default is 2.
+    :param bandwidth: bandwidth of Kernel Smoothing method LocalLinearRegressionHatMatrix. Default is 1.
+    :param output_folder: output folder for smoothing figures.
+    :param fig_name_suffix: suffix in the output figure name.
+    '''
 
     if method == 'knn':
         smoother = KernelSmoother(kernel_estimator=hm.KNeighborsHatMatrix(n_neighbors = n_neighbors))
@@ -329,6 +346,16 @@ def draw_smoothing_clusters(fd_whole, df_cluster,
                             cluster_key = 'clusters_fuzzy', 
                             output_folder = 'Temporal_CellDrift/figures/',
                             ylim = None):
+    '''
+    Draw smoothed curves for all CellDrift derived clusters.
+
+    :param fd_whole: FDA object, such as the FDA object for all genes in a specific cell-type+perturbation combination.
+    :param df_cluster: dataframe of cluster output from function fda_cluster.
+    :param n_neighbors: number of neighbors for Kernel Smoothing method KNeighborsHatMatrix. Default is 2.
+    :param bandwidth: bandwidth of Kernel Smoothing method LocalLinearRegressionHatMatrix. Default is 1.
+    :param cluster_key: the key of cluster in the data frame df_cluster
+    :param output_folder: output folder for smoothing figures.
+    '''
 
     clusters = df_cluster[cluster_key].unique()
     fd_mean = fd_whole.mean()

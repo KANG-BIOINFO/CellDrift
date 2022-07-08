@@ -40,60 +40,43 @@ def setup_celldrift(
     '''
     Set up CellDrift with key words set.
 
-    Parameters
-    ----------
-    adata
-        AnnData as the input.
-    cell_type_key
-        The key in adata.obs that indicates cell type assignments.
-    perturb_key
-        The key in adata.obs that indicates perturbation assignments
-    size_factor_key
-        The key of size factor for anndata. e.g. n_counts.
-    time_key
-        The key of time point indicator. Values in this covariate must be numeric
-    batch_key:
-        The key of batch covariate.
-    control_name
-        control value in the perturb_key.
-    perturb_name
-        a list of perturbation labels of interest. Default is None. If None, all unique values apart from control_name from perturb_key will be used.
-    use_pseudotime
-        whether time key is pseudotime or not. Default is False.
-    pseudotime_n_bins
-        number of pseudotime bins if use_pseudotime is True. Default is 10
-    n_reps
-        number of replicate runs of CellDrift. Default is 3.
-    n_cells_perBlock
-        number of cells in each (cell type + perturbation + time point) combination. Default is 50
-    min_cells_perGene
-        filtering criteria for genes. Default is None.
+    :param adata: AnnData as the input.
+    :param cell_type_key: The key in adata.obs that indicates cell type assignments.
+    :param perturb_key: The key in adata.obs that indicates perturbation assignments
+    :param size_factor_key: The key of size factor for anndata. e.g. n_counts.
+    :param time_key: The key of time point indicator. Values in this covariate must be numeric
+    :param batch_key: The key of batch covariate.
+    :param control_name: control value in the perturb_key.
+    :param perturb_name: a list of perturbation labels of interest. Default is None. If None, all unique values apart from control_name from perturb_key will be used.
+    :param use_pseudotime: whether time key is pseudotime or not. Default is False.
+    :param pseudotime_n_bins: number of pseudotime bins if use_pseudotime is True. Default is 10
+    :param n_reps: number of replicate runs of CellDrift. Default is 3.
+    :param n_cells_perBlock: number of cells in each (cell type + perturbation + time point) combination. Default is 50
+    :param min_cells_perGene: filtering criteria for genes. Default is None.
 
-    Examples
-    --------
-    import scanpy as sc
-    import CellDrift as ct
+    Examples: 
+        import scanpy as sc
+        import CellDrift as ct
 
-    kc = 'Cell_Type'
-    kp = 'Disease_State'
-    kt = 'Time_Since_Onset'
-    kp_p = 'COVID_SEVERE'
-    kp_c = 'CTRL'
+        kc = 'Cell_Type'
+        kp = 'Disease_State'
+        kt = 'Time_Since_Onset'
+        kp_p = 'COVID_SEVERE'
+        kp_c = 'CTRL'
 
-    adata = sc.read('test.h5ad')
-    adata = ct.setup_celldrift(
-        adata, 
-        cell_type_key = kc, 
-        perturb_key = kp, 
-        time_key = kt,
-        control_name = kp_c, 
-        perturb_name = None, 
-        size_factor_key = 'size_factor', 
-        batch_key = None,
-        min_cells_perGene = 200,
-        use_pseudotime = False
-    )
-
+        adata = sc.read('test.h5ad')
+        adata = ct.setup_celldrift(
+            adata, 
+            cell_type_key = kc, 
+            perturb_key = kp, 
+            time_key = kt,
+            control_name = kp_c, 
+            perturb_name = None, 
+            size_factor_key = 'size_factor', 
+            batch_key = None,
+            min_cells_perGene = 200,
+            use_pseudotime = False
+        )
     '''
     # initialization
     logger.info('---Step1: Set up the celldrift object...')

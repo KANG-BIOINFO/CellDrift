@@ -496,12 +496,13 @@ def model_timescale(adata, n_processes = 16, chunksize = 100, adjust_batch = Tru
     '''
     run the GLM model across multiple time points. Also refer to model_genes to see model for one time point.
 
-    Parameters
-    ----------
-    adata
-        CellDrift anndata
-    **kwargs
-        model_genes proporties
+    :param adata: CellDrift anndata after running setup_celldrift.
+    :param n_processes: number of processors for multiprocessing. Default is 16.
+    :param chunksize: number of genes for each processor. Default is 100.
+    :param adjust_batch: whether to adjust batch effect in the generalized linear model. Default is True.
+    :param add_dummy: whether to add dummy values to resolve the sparse input of single-cell data. (Not implemented)
+    :param pairwise_contrast_only: whether to output pairwise contrast coefficients only. Default is False, which means the results also include other output from the GLM model.
+    :param output_suffix: suffix characters to be added in each output file. Default is None.
     '''
     # initialization
     time_key = adata.uns['celldrift']['time_key']
