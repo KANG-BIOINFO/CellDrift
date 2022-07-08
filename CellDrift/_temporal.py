@@ -278,6 +278,10 @@ class FDA:
 
 def fda_cluster(fd, genes, n_clusters = 20, seed = 42, suffix = '', output_folder = 'Temporal_CellDrift/'):
     
+    '''
+    Find functional data analysis clusters
+    '''
+
     # run clustering methods
     kmeans = KMeans(n_clusters = n_clusters, random_state = seed)
     kmeans.fit(fd)

@@ -1,7 +1,7 @@
 API
 ----------------
 
-The test module contains ..
+The test module contains ..,
 
 .. automodule:: _model
 
