@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CellDrift._setup &mdash; CellDrift 0.1.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> CellDrift
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apis.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../related_research.html">Related Research</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contact.html">Contact</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">CellDrift</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>CellDrift._setup</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for CellDrift._setup</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
+<span class="kn">from</span> <span class="nn">anndata</span> <span class="kn">import</span> <span class="n">AnnData</span>
+
+<span class="kn">from</span> <span class="nn">._trajectory</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">prepare_item</span><span class="p">(</span><span class="n">input_item</span><span class="p">):</span>
+    <span class="n">input_item</span> <span class="o">=</span> <span class="n">input_item</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span>
+    <span class="n">input_item</span> <span class="o">=</span> <span class="n">input_item</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span>
+    <span class="n">input_item</span> <span class="o">=</span> <span class="n">input_item</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span>
+    <span class="n">input_item</span> <span class="o">=</span> <span class="n">input_item</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span>
+    <span class="n">input_item</span> <span class="o">=</span> <span class="n">input_item</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">input_item</span>
+
+<div class="viewcode-block" id="setup_celldrift"><a class="viewcode-back" href="../../apis.html#CellDrift._setup.setup_celldrift">[docs]</a><span class="k">def</span> <span class="nf">setup_celldrift</span><span class="p">(</span>
+    <span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span> 
+    <span class="n">cell_type_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
+    <span class="n">perturb_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
+    <span class="n">size_factor_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
+    <span class="n">time_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">batch_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> 
+    <span class="n">control_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> 
+    <span class="n">perturb_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+    <span class="n">use_pseudotime</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">pseudotime_n_bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="n">n_reps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="n">n_cells_perBlock</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
+    <span class="n">min_cells_perGene</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Set up CellDrift with key words set.</span>
+
+<span class="sd">    :param adata: AnnData as the input.</span>
+<span class="sd">    :param cell_type_key: The key in adata.obs that indicates cell type assignments.</span>
+<span class="sd">    :param perturb_key: The key in adata.obs that indicates perturbation assignments</span>
+<span class="sd">    :param size_factor_key: The key of size factor for anndata. e.g. n_counts.</span>
+<span class="sd">    :param time_key: The key of time point indicator. Values in this covariate must be numeric</span>
+<span class="sd">    :param batch_key: The key of batch covariate.</span>
+<span class="sd">    :param control_name: control value in the perturb_key.</span>
+<span class="sd">    :param perturb_name: a list of perturbation labels of interest. Default is None. If None, all unique values apart from control_name from perturb_key will be used.</span>
+<span class="sd">    :param use_pseudotime: whether time key is pseudotime or not. Default is False.</span>
+<span class="sd">    :param pseudotime_n_bins: number of pseudotime bins if use_pseudotime is True. Default is 10</span>
+<span class="sd">    :param n_reps: number of replicate runs of CellDrift. Default is 3.</span>
+<span class="sd">    :param n_cells_perBlock: number of cells in each (cell type + perturbation + time point) combination. Default is 50</span>
+<span class="sd">    :param min_cells_perGene: filtering criteria for genes. Default is None.</span>
+
+<span class="sd">    Examples::</span>
+
+<span class="sd">        import scanpy as sc</span>
+<span class="sd">        import CellDrift as ct</span>
+<span class="sd">        kc = &#39;Cell_Type&#39;</span>
+<span class="sd">        kp = &#39;Disease_State&#39;</span>
+<span class="sd">        kt = &#39;Time_Since_Onset&#39;</span>
+<span class="sd">        kp_p = &#39;COVID_SEVERE&#39;</span>
+<span class="sd">        kp_c = &#39;CTRL&#39;</span>
+<span class="sd">        adata = sc.read(&#39;test.h5ad&#39;)</span>
+<span class="sd">        adata = ct.setup_celldrift(</span>
+<span class="sd">            adata, </span>
+<span class="sd">            cell_type_key = kc, </span>
+<span class="sd">            perturb_key = kp, </span>
+<span class="sd">            time_key = kt,</span>
+<span class="sd">            control_name = kp_c, </span>
+<span class="sd">            perturb_name = None, </span>
+<span class="sd">            size_factor_key = &#39;size_factor&#39;, </span>
+<span class="sd">            batch_key = None,</span>
+<span class="sd">            min_cells_perGene = 200,</span>
+<span class="sd">            use_pseudotime = False</span>
+<span class="sd">        )</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># initialization</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;---Step1: Set up the celldrift object...&#39;</span><span class="p">)</span>
+    <span class="n">cell_type_key_n</span> <span class="o">=</span> <span class="n">prepare_item</span><span class="p">(</span><span class="n">cell_type_key</span><span class="p">)</span>
+    <span class="n">perturb_key_n</span> <span class="o">=</span> <span class="n">prepare_item</span><span class="p">(</span><span class="n">perturb_key</span><span class="p">)</span>
+    <span class="n">size_factor_key_n</span> <span class="o">=</span> <span class="n">prepare_item</span><span class="p">(</span><span class="n">size_factor_key</span><span class="p">)</span>
+    <span class="n">time_key_n</span> <span class="o">=</span> <span class="n">prepare_item</span><span class="p">(</span><span class="n">time_key</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_numeric_dtype</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">time_key_n</span><span class="p">]):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Values in &#39;</span> <span class="o">+</span> <span class="n">time_key_n</span> <span class="o">+</span> <span class="s1">&#39; must be numeric (int or float).&#39;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_numeric_dtype</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">size_factor_key_n</span><span class="p">]):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Values in &#39;</span> <span class="o">+</span> <span class="n">size_factor_key_n</span> <span class="o">+</span> <span class="s1">&#39; must be numeric (int or float).&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">batch_key</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">batch_key_n</span> <span class="o">=</span> <span class="n">prepare_item</span><span class="p">(</span><span class="n">batch_key</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;---Step1: rename keys to &#39;</span> <span class="o">+</span> <span class="n">cell_type_key_n</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span> <span class="o">+</span> <span class="n">perturb_key_n</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span> <span class="o">+</span> <span class="n">size_factor_key_n</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span> <span class="o">+</span> <span class="n">batch_key_n</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">batch_key_n</span> <span class="o">=</span> <span class="n">batch_key</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;---Step1: rename keys to &#39;</span> <span class="o">+</span> <span class="n">cell_type_key_n</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span> <span class="o">+</span> <span class="n">perturb_key_n</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span> <span class="o">+</span> <span class="n">size_factor_key_n</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span><span class="p">)</span>
+
+    <span class="n">perturb_name</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">setdiff1d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">perturb_key</span><span class="p">]),</span> <span class="p">[</span><span class="n">control_name</span><span class="p">]))</span> <span class="k">if</span> <span class="n">perturb_name</span> <span class="o">==</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">perturb_name</span>
+
+    <span class="c1"># set cell type / perturbation annotations as category</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">obs</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="n">cell_type_key</span><span class="p">:</span> <span class="s1">&#39;category&#39;</span><span class="p">,</span> <span class="n">perturb_key</span><span class="p">:</span> <span class="s1">&#39;category&#39;</span><span class="p">})</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">cell_type_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">cell_type_key</span><span class="p">]</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">remove_unused_categories</span><span class="p">()</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">perturb_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">perturb_key</span><span class="p">]</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">remove_unused_categories</span><span class="p">()</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">perturb_key</span><span class="p">]</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">reorder_categories</span><span class="p">([</span><span class="n">control_name</span><span class="p">]</span> <span class="o">+</span> <span class="n">perturb_name</span><span class="p">,</span> <span class="n">inplace</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+    
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;perturbation levels includes: &#39;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">perturb_key</span><span class="p">]</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">categories</span><span class="p">)</span>
+
+    <span class="c1"># rename columns</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">obs</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">rename</span><span class="p">({</span><span class="n">cell_type_key</span><span class="p">:</span> <span class="n">cell_type_key_n</span><span class="p">,</span>
+                                <span class="n">perturb_key</span><span class="p">:</span> <span class="n">perturb_key_n</span><span class="p">,</span>
+                                <span class="n">size_factor_key</span><span class="p">:</span> <span class="n">size_factor_key_n</span><span class="p">,</span>
+                                <span class="n">batch_key</span><span class="p">:</span> <span class="n">batch_key_n</span><span class="p">})</span>                                
+    
+    <span class="c1"># store attributes</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;celldrift&#39;</span><span class="p">]</span> <span class="o">=</span>  <span class="p">{</span><span class="s1">&#39;cell_type_key&#39;</span><span class="p">:</span> <span class="n">cell_type_key_n</span><span class="p">,</span>
+                                <span class="s1">&#39;perturb_key&#39;</span><span class="p">:</span> <span class="n">perturb_key_n</span><span class="p">,</span>
+                                <span class="s1">&#39;size_factor_key&#39;</span><span class="p">:</span> <span class="n">size_factor_key_n</span><span class="p">,</span>
+                                <span class="s1">&#39;batch_key&#39;</span><span class="p">:</span> <span class="n">batch_key_n</span><span class="p">,</span>
+                                <span class="s1">&#39;time_key&#39;</span><span class="p">:</span> <span class="n">time_key_n</span><span class="p">,</span>
+                                <span class="s1">&#39;group_control&#39;</span><span class="p">:</span> <span class="n">control_name</span><span class="p">,</span>
+                                <span class="s1">&#39;group_perturb&#39;</span><span class="p">:</span> <span class="n">perturb_name</span><span class="p">,</span>
+                                <span class="s1">&#39;n_cell_types&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">cell_type_key_n</span><span class="p">]</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">categories</span><span class="p">),</span>
+                                <span class="s1">&#39;n_perturbations&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">perturb_key_n</span><span class="p">]</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">categories</span><span class="p">),</span>
+                                <span class="s1">&#39;n_coefficients&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">cell_type_key_n</span><span class="p">]</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">categories</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">perturb_key_n</span><span class="p">]</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">categories</span><span class="p">),</span>
+                                <span class="s1">&#39;figure_dir&#39;</span><span class="p">:</span> <span class="s1">&#39;Figures_CellDrift/&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;output_dir&#39;</span><span class="p">:</span> <span class="s1">&#39;Coefficients_CellDrift/&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;temporal_dir&#39;</span><span class="p">:</span> <span class="s1">&#39;Temporal_CellDrift/&#39;</span><span class="p">}</span>
+    <span class="c1"># filter genes</span>
+    <span class="k">if</span> <span class="n">min_cells_perGene</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;---Step1: do the gene filtering&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;---Step1: number of genes before filtering: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">filter_genes</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">min_cells</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">filter_genes</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">min_cells</span> <span class="o">=</span> <span class="n">min_cells_perGene</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;---Step1: number of genes after filtering: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="c1"># reformat genes so that they won&#39;t confuse models</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;---Step1: reformat gene names to avoid confusing the glm model.&#39;</span><span class="p">)</span>
+    <span class="n">genes</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s1">&#39;original_names&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">genes</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s1">&#39;new_index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">prepare_item</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">genes</span><span class="p">]</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;new_index&#39;</span><span class="p">,</span> <span class="n">inplace</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># remove weird genes</span>
+    <span class="n">weird_genes</span> <span class="o">=</span> <span class="p">[</span><span class="n">g</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span> <span class="k">if</span> <span class="n">g</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()]</span> <span class="c1"># genes start with digits</span>
+    <span class="n">filtered_genes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">setdiff1d</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">weird_genes</span><span class="p">)</span>
+    <span class="n">adata</span> <span class="o">=</span> <span class="n">adata</span><span class="p">[:,</span> <span class="n">filtered_genes</span><span class="p">]</span>
+
+    <span class="c1"># cretae pseudotime bins</span>
+    <span class="k">if</span> <span class="n">use_pseudotime</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">adata</span> <span class="o">=</span> <span class="n">create_pseudotime_bins</span><span class="p">(</span>
+            <span class="n">adata</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> 
+            <span class="n">trajectory_key</span> <span class="o">=</span> <span class="n">cell_type_key_n</span><span class="p">,</span> 
+            <span class="n">pseudotime_key</span> <span class="o">=</span> <span class="n">time_key_n</span><span class="p">,</span> 
+            <span class="n">n_bins</span> <span class="o">=</span> <span class="n">pseudotime_n_bins</span><span class="p">,</span> 
+            <span class="n">min_cells_pert</span> <span class="o">=</span> <span class="n">min_cells_perGene</span>
+        <span class="p">)</span>
+
+    <span class="c1"># select cells for replicates</span>
+    <span class="n">df_cells</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">df_cells</span><span class="p">[</span><span class="s1">&#39;combs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="n">j</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">))</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">)</span> <span class="ow">in</span> \
+                        <span class="nb">zip</span><span class="p">(</span><span class="n">df_cells</span><span class="p">[</span><span class="n">cell_type_key_n</span><span class="p">],</span> <span class="n">df_cells</span><span class="p">[</span><span class="n">perturb_key_n</span><span class="p">],</span> <span class="n">df_cells</span><span class="p">[</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;celldrift&#39;</span><span class="p">][</span><span class="s1">&#39;time_key&#39;</span><span class="p">]])]</span>
+    <span class="n">combs_unique</span> <span class="o">=</span> <span class="n">df_cells</span><span class="p">[</span><span class="s1">&#39;combs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+    
+    <span class="k">for</span> <span class="n">rep</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_reps</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">cells_pooled</span> <span class="o">=</span> <span class="p">[]</span>    
+        <span class="k">for</span> <span class="n">comb</span> <span class="ow">in</span> <span class="n">combs_unique</span><span class="p">:</span>
+            <span class="n">df_subset</span> <span class="o">=</span> <span class="n">df_cells</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df_cells</span><span class="p">[</span><span class="s1">&#39;combs&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">comb</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">max_cells</span> <span class="o">=</span> <span class="n">df_subset</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">rep</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">selected_cells</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">df_subset</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">),</span> <span class="n">n_cells_perBlock</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">selected_cells</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">df_subset</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">),</span> <span class="n">max_cells</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;---Step1:&#39;</span> <span class="o">+</span> <span class="n">comb</span> <span class="o">+</span> <span class="s1">&#39; has less than &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">n_cells_perBlock</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;cells.&#39;</span><span class="p">)</span>
+
+            <span class="n">cells_pooled</span> <span class="o">+=</span> <span class="n">selected_cells</span>
+        <span class="n">rep_key</span> <span class="o">=</span> <span class="s1">&#39;selection_rep_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rep</span><span class="p">)</span> 
+        <span class="n">df_cells</span><span class="p">[</span><span class="n">rep_key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">df_cells</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">cells_pooled</span><span class="p">,</span> <span class="n">rep_key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    
+    <span class="n">adata</span><span class="o">.</span><span class="n">obs</span> <span class="o">=</span> <span class="n">df_cells</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;celldrift&#39;</span><span class="p">][</span><span class="s1">&#39;n_reps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">n_reps</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;celldrift&#39;</span><span class="p">][</span><span class="s1">&#39;rep_key&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;selection_rep_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_reps</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+        
+    <span class="k">return</span> <span class="n">adata</span></div>
+
+<span class="k">def</span> <span class="nf">update_celldrift</span><span class="p">(</span><span class="n">adata</span><span class="p">):</span>
+    <span class="n">cell_type_key</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;celldrift&#39;</span><span class="p">][</span><span class="s1">&#39;cell_type_key&#39;</span><span class="p">]</span>
+    <span class="n">perturb_key</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;celldrift&#39;</span><span class="p">][</span><span class="s1">&#39;perturb_key&#39;</span><span class="p">]</span>
+    <span class="n">control_group</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;celldrift&#39;</span><span class="p">][</span><span class="s1">&#39;group_control&#39;</span><span class="p">]</span>
+
+    <span class="n">perturb_groups</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">setdiff1d</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">perturb_key</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">(),</span> <span class="p">[</span><span class="n">control_group</span><span class="p">])</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">perturb_key</span><span class="p">]</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">categories</span> <span class="o">=</span> <span class="p">[</span><span class="n">control_group</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">perturb_groups</span><span class="p">)</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">cell_type_key</span><span class="p">]</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">categories</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">cell_type_key</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+
+    <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;celldrift&#39;</span><span class="p">][</span><span class="s1">&#39;n_perturbations&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">perturb_key</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;celldrift&#39;</span><span class="p">][</span><span class="s1">&#39;n_cell_types&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">perturb_key</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">adata</span>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Kang Jin.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
