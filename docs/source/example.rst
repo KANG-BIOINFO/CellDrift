@@ -10,8 +10,7 @@ This is an example of the CellDrift application in a longitudinal HIV-1 hyperacu
 This scRNA-seq data covers peripheral blood mononuclear cells from untreated individuals with HIV infections before and after acute infection. Longitudinal samples were collected from these patients from week 0 to year 1 post-infection. Multiple cell types involved in immune responses were annotated and analyzed. The data was downloaded from single cell portal SCP256.
 
 We first prepare the input data.
-.. code-block::
-    import numpy as np
+>>> import numpy as np
     import pandas as pd
     import scanpy as sc
     import CellDrift as ct
@@ -38,8 +37,7 @@ We first prepare the input data.
     S00005    B cell  P3_4 Weeks  1179  HIV infectious disease  4 Weeks       28        hiv
 
 It is recommended to do the feature selection. The reason for feature selection is to investigate the most interesting genes and to reduce running time.
-.. code-block:: 
-    # select highly variable genes
+>>> # select highly variable genes
     def select_variable_genes(data, n_top_genes):
         # normalize raw data
         sc.pp.filter_genes(data, min_cells = 200)
