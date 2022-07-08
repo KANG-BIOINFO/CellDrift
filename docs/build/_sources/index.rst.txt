@@ -5,7 +5,7 @@
 
 CellDrift Tutorial
 =====================================
-CellDrift is a python package for the evaluation of temporal perturbation effects using single-cell RNA-seq data.
+CellDrift is a python package for the evaluation of temporal perturbation effects using single-cell RNA-sequencing data.
 
 * :ref:`Get to know more about the background the project. <narrative_background>`
 * `Discuss usage on Discourse and development on GitHub. <https://github.com/KANG-BIOINFO/CellDrift>`_
