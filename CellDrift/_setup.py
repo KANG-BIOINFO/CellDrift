@@ -54,16 +54,15 @@ def setup_celldrift(
     :param n_cells_perBlock: number of cells in each (cell type + perturbation + time point) combination. Default is 50
     :param min_cells_perGene: filtering criteria for genes. Default is None.
 
-    Examples: 
+    Examples::
+
         import scanpy as sc
         import CellDrift as ct
-
         kc = 'Cell_Type'
         kp = 'Disease_State'
         kt = 'Time_Since_Onset'
         kp_p = 'COVID_SEVERE'
         kp_c = 'CTRL'
-
         adata = sc.read('test.h5ad')
         adata = ct.setup_celldrift(
             adata, 

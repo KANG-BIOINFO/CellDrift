@@ -15,7 +15,7 @@ CellDrift is a python package for the evaluation of temporal perturbation effect
 
 
 .. toctree::
-    introduction.md
+    introduction.rst
     install.rst
     example.rst
     apis.rst
