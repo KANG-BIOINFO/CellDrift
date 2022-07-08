@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Introduction &mdash; CellDrift 0.1.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="install.html" />
+    <link rel="prev" title="CellDrift Tutorial" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> CellDrift
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#why-do-we-develop-celldrift">Why do we develop CellDrift?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-is-the-appropriate-input-data">What is the appropriate input data?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-is-the-expected-output">What is the expected output?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apis.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="related_research.html">Related Research</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contact.html">Contact</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">CellDrift</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Introduction</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/introduction.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">¶</a></h1>
+<section id="why-do-we-develop-celldrift">
+<span id="narrative-background"></span><h2>Why do we develop CellDrift?<a class="headerlink" href="#why-do-we-develop-celldrift" title="Permalink to this heading">¶</a></h2>
+<p>Researchers have applied the single-cell RNA-sequencing technology in experiments with perturbation settings such as diseases, treatments, genetic mutations, and organ differentiation to explore transcriptional profiles across various biochemical states.</p>
+<p>The response to perturbation can vary over time, which is overlooked in many single cell studies. As a result, we develop CellDrift, a generalized linear model-based functional data analysis method capable of identifying covarying temporal patterns of various cell types in response to perturbations. It includes functions below:</p>
+<ol class="arabic simple">
+<li><p>Disentangle common and cell type specific perturbation effects across time;</p></li>
+<li><p>Identify patterns of genes that have similar temporal perturbation responses;</p></li>
+<li><p>Prioritize genes with distinct temporal perturbation responses between perturbations or cell types;</p></li>
+<li><p>Infer differential genes of perturbational states in the pseudo-time trajectories.</p></li>
+</ol>
+<img alt="_images/overview.png" src="_images/overview.png" />
+</section>
+<section id="what-is-the-appropriate-input-data">
+<h2>What is the appropriate input data?<a class="headerlink" href="#what-is-the-appropriate-input-data" title="Permalink to this heading">¶</a></h2>
+<p>Since CellDrift was designed to resolve the temporal perturbation effects in single cell data, users need to input single cell data with at least the time and perturbation covariates. It is encouraged to provide cell type annotations, so users can take the advantage of CellDrift to interrogate the cell-type-specific perturbation effects along the time.
+For example, the image below is an overview of COVID-19 single cell metadata, which contains cell type, perturbation and time covariates.</p>
+<img alt="_images/Figure4d.jpg" src="_images/Figure4d.jpg" />
+<p>The input data should be anndata, and cell type, perturbation, time, batch covariates should be included in the .obs in the anndata, for example:</p>
+</section>
+<section id="what-is-the-expected-output">
+<h2>What is the expected output?<a class="headerlink" href="#what-is-the-expected-output" title="Permalink to this heading">¶</a></h2>
+<p>There are two parts of the output of CellDrift, including the output of the generalized linear model (under folder “Coefficients_CellDrift”), and the output of functional data (temporal) analysis (under folder “Temporal_CellDrift”).
+1. The generalized linear model output is stored in txt files, which contains cell-type specific coefficients and their z scores for each time points.
+2. The temporal analysis output is represented as clustering assignments, or smoothing curves for each temporal patterns.</p>
+<img alt="_images/Figure4c.jpg" src="_images/Figure4c.jpg" />
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="CellDrift Tutorial" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="install.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Kang Jin.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

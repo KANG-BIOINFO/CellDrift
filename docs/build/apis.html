@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API &mdash; CellDrift 0.1.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Reference" href="reference.html" />
+    <link rel="prev" title="Tutorial" href="example.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> CellDrift
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example.html">Tutorial</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#setup-celldrift">setup_celldrift</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#model-timescale">model_timescale</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fda-cluster">fda_cluster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#draw-smoothing">draw_smoothing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#draw-smoothing-clusters">draw_smoothing_clusters</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="related_research.html">Related Research</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contact.html">Contact</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">CellDrift</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>API</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/apis.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="api">
+<h1>API<a class="headerlink" href="#api" title="Permalink to this heading">¶</a></h1>
+<section id="setup-celldrift">
+<h2>setup_celldrift<a class="headerlink" href="#setup-celldrift" title="Permalink to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="CellDrift._setup.setup_celldrift">
+<span class="sig-prename descclassname"><span class="pre">CellDrift._setup.</span></span><span class="sig-name descname"><span class="pre">setup_celldrift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perturb_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size_factor_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perturb_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_pseudotime</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pseudotime_n_bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_reps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_cells_perBlock</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_cells_perGene</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CellDrift/_setup.html#setup_celldrift"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CellDrift._setup.setup_celldrift" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set up CellDrift with key words set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> – AnnData as the input.</p></li>
+<li><p><strong>cell_type_key</strong> – The key in adata.obs that indicates cell type assignments.</p></li>
+<li><p><strong>perturb_key</strong> – The key in adata.obs that indicates perturbation assignments</p></li>
+<li><p><strong>size_factor_key</strong> – The key of size factor for anndata. e.g. n_counts.</p></li>
+<li><p><strong>time_key</strong> – The key of time point indicator. Values in this covariate must be numeric</p></li>
+<li><p><strong>batch_key</strong> – The key of batch covariate.</p></li>
+<li><p><strong>control_name</strong> – control value in the perturb_key.</p></li>
+<li><p><strong>perturb_name</strong> – a list of perturbation labels of interest. Default is None. If None, all unique values apart from control_name from perturb_key will be used.</p></li>
+<li><p><strong>use_pseudotime</strong> – whether time key is pseudotime or not. Default is False.</p></li>
+<li><p><strong>pseudotime_n_bins</strong> – number of pseudotime bins if use_pseudotime is True. Default is 10</p></li>
+<li><p><strong>n_reps</strong> – number of replicate runs of CellDrift. Default is 3.</p></li>
+<li><p><strong>n_cells_perBlock</strong> – number of cells in each (cell type + perturbation + time point) combination. Default is 50</p></li>
+<li><p><strong>min_cells_perGene</strong> – filtering criteria for genes. Default is None.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Examples:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
+<span class="kn">import</span> <span class="nn">CellDrift</span> <span class="k">as</span> <span class="nn">ct</span>
+<span class="n">kc</span> <span class="o">=</span> <span class="s1">&#39;Cell_Type&#39;</span>
+<span class="n">kp</span> <span class="o">=</span> <span class="s1">&#39;Disease_State&#39;</span>
+<span class="n">kt</span> <span class="o">=</span> <span class="s1">&#39;Time_Since_Onset&#39;</span>
+<span class="n">kp_p</span> <span class="o">=</span> <span class="s1">&#39;COVID_SEVERE&#39;</span>
+<span class="n">kp_c</span> <span class="o">=</span> <span class="s1">&#39;CTRL&#39;</span>
+<span class="n">adata</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;test.h5ad&#39;</span><span class="p">)</span>
+<span class="n">adata</span> <span class="o">=</span> <span class="n">ct</span><span class="o">.</span><span class="n">setup_celldrift</span><span class="p">(</span>
+    <span class="n">adata</span><span class="p">,</span> 
+    <span class="n">cell_type_key</span> <span class="o">=</span> <span class="n">kc</span><span class="p">,</span> 
+    <span class="n">perturb_key</span> <span class="o">=</span> <span class="n">kp</span><span class="p">,</span> 
+    <span class="n">time_key</span> <span class="o">=</span> <span class="n">kt</span><span class="p">,</span>
+    <span class="n">control_name</span> <span class="o">=</span> <span class="n">kp_c</span><span class="p">,</span> 
+    <span class="n">perturb_name</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+    <span class="n">size_factor_key</span> <span class="o">=</span> <span class="s1">&#39;size_factor&#39;</span><span class="p">,</span> 
+    <span class="n">batch_key</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">min_cells_perGene</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span>
+    <span class="n">use_pseudotime</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+<section id="model-timescale">
+<h2>model_timescale<a class="headerlink" href="#model-timescale" title="Permalink to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="CellDrift._model.model_timescale">
+<span class="sig-prename descclassname"><span class="pre">CellDrift._model.</span></span><span class="sig-name descname"><span class="pre">model_timescale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_processes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunksize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adjust_batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_dummy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pairwise_contrast_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CellDrift/_model.html#model_timescale"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CellDrift._model.model_timescale" title="Permalink to this definition">¶</a></dt>
+<dd><p>run the GLM model across multiple time points. Also refer to model_genes to see model for one time point.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> – CellDrift anndata after running setup_celldrift.</p></li>
+<li><p><strong>n_processes</strong> – number of processors for multiprocessing. Default is 16.</p></li>
+<li><p><strong>chunksize</strong> – number of genes for each processor. Default is 100.</p></li>
+<li><p><strong>adjust_batch</strong> – whether to adjust batch effect in the generalized linear model. Default is True.</p></li>
+<li><p><strong>add_dummy</strong> – whether to add dummy values to resolve the sparse input of single-cell data. (Not implemented)</p></li>
+<li><p><strong>pairwise_contrast_only</strong> – whether to output pairwise contrast coefficients only. Default is False, which means the results also include other output from the GLM model.</p></li>
+<li><p><strong>output_suffix</strong> – suffix characters to be added in each output file. Default is None.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="fda-cluster">
+<h2>fda_cluster<a class="headerlink" href="#fda-cluster" title="Permalink to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="CellDrift._temporal.fda_cluster">
+<span class="sig-prename descclassname"><span class="pre">CellDrift._temporal.</span></span><span class="sig-name descname"><span class="pre">fda_cluster</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">genes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_clusters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Temporal_CellDrift/'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CellDrift/_temporal.html#fda_cluster"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CellDrift._temporal.fda_cluster" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find functional data analysis clusters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fd</strong> – FDA object.</p></li>
+<li><p><strong>genes</strong> – genes used to run clustering algorithms.</p></li>
+<li><p><strong>n_clusters</strong> – number of clusters. Default is 20.</p></li>
+<li><p><strong>seed</strong> – random seed. Default is 42.</p></li>
+<li><p><strong>suffix</strong> – suffix in the name of output file.</p></li>
+<li><p><strong>output_folder</strong> – location of output folder.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="draw-smoothing">
+<h2>draw_smoothing<a class="headerlink" href="#draw-smoothing" title="Permalink to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="CellDrift._temporal.draw_smoothing">
+<span class="sig-prename descclassname"><span class="pre">CellDrift._temporal.</span></span><span class="sig-name descname"><span class="pre">draw_smoothing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nw'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_neighbors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandwidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Figures_CellDrift/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_name_suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CellDrift/_temporal.html#draw_smoothing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CellDrift._temporal.draw_smoothing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw a smoothed curve for functional data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fd</strong> – FDA object, such as the FDA object for all cell-type+perturbation combinations in a specific gene.</p></li>
+<li><p><strong>method</strong> – method of smoothing, including knn, llr and nw. Default is nw</p></li>
+<li><p><strong>n_neighbors</strong> – number of neighbors for Kernel Smoothing method KNeighborsHatMatrix. Default is 2.</p></li>
+<li><p><strong>bandwidth</strong> – bandwidth of Kernel Smoothing method LocalLinearRegressionHatMatrix. Default is 1.</p></li>
+<li><p><strong>output_folder</strong> – output folder for smoothing figures.</p></li>
+<li><p><strong>fig_name_suffix</strong> – suffix in the output figure name.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="draw-smoothing-clusters">
+<h2>draw_smoothing_clusters<a class="headerlink" href="#draw-smoothing-clusters" title="Permalink to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="CellDrift._temporal.draw_smoothing_clusters">
+<span class="sig-prename descclassname"><span class="pre">CellDrift._temporal.</span></span><span class="sig-name descname"><span class="pre">draw_smoothing_clusters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fd_whole</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_cluster</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_neighbors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandwidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'clusters_fuzzy'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Temporal_CellDrift/figures/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CellDrift/_temporal.html#draw_smoothing_clusters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CellDrift._temporal.draw_smoothing_clusters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw smoothed curves for all CellDrift derived clusters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fd_whole</strong> – FDA object, such as the FDA object for all genes in a specific cell-type+perturbation combination.</p></li>
+<li><p><strong>df_cluster</strong> – dataframe of cluster output from function fda_cluster.</p></li>
+<li><p><strong>n_neighbors</strong> – number of neighbors for Kernel Smoothing method KNeighborsHatMatrix. Default is 2.</p></li>
+<li><p><strong>bandwidth</strong> – bandwidth of Kernel Smoothing method LocalLinearRegressionHatMatrix. Default is 1.</p></li>
+<li><p><strong>cluster_key</strong> – the key of cluster in the data frame df_cluster</p></li>
+<li><p><strong>output_folder</strong> – output folder for smoothing figures.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="example.html" class="btn btn-neutral float-left" title="Tutorial" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="reference.html" class="btn btn-neutral float-right" title="Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Kang Jin.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

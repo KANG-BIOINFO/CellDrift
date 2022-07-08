@@ -1,0 +1,4 @@
+Index
+=====
+
+An index page.

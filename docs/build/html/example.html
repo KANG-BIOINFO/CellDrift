@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tutorial &mdash; CellDrift 0.1.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API" href="apis.html" />
+    <link rel="prev" title="Installation" href="install.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> CellDrift
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#hiv-infection-study">HIV Infection Study</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="apis.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="related_research.html">Related Research</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contact.html">Contact</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">CellDrift</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Tutorial</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/example.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="tutorial">
+<h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this heading">¶</a></h1>
+<section id="hiv-infection-study">
+<span id="narrative-tutorial"></span><h2>HIV Infection Study<a class="headerlink" href="#hiv-infection-study" title="Permalink to this heading">¶</a></h2>
+<p>This is an example of the CellDrift application in a longitudinal HIV-1 hyperacute infection study.
+This scRNA-seq data covers peripheral blood mononuclear cells from untreated individuals with HIV infections before and after acute infection. Longitudinal samples were collected from these patients from week 0 to year 1 post-infection. Multiple cell types involved in immune responses were annotated and analyzed. The data was downloaded from single cell portal SCP256.</p>
+<p>We first prepare the input data.
+&gt;&gt;&gt; import numpy as np</p>
+<blockquote>
+<div><p>import pandas as pd
+import scanpy as sc
+import CellDrift as ct</p>
+<p>adata = sc.read(‘../raw_v2.h5ad’)
+kc = ‘cell_type’ # key of cell type
+kp = ‘disease_v2’ # key of perturbation
+kt = ‘time_v2’ # key of time points</p>
+<p>print(adata)
+print(adata.obs.head())</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">adata</span>
+<span class="go">AnnData object with n_obs × n_vars = 59286 × 16980</span>
+<span class="go">    obs: &#39;cell_type&#39;, &#39;sample&#39;, &#39;nUMI&#39;, &#39;disease&#39;, &#39;time&#39;, &#39;time_v2&#39;, &#39;disease_v2&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="go">    cell_type      sample  nUMI                 disease     time  time_v2 disease_v2</span>
+<span class="go">NAME</span>
+<span class="go">S00001    B cell  P3_4 Weeks  1660  HIV infectious disease  4 Weeks       28        hiv</span>
+<span class="go">S00002    B cell  P3_4 Weeks  1198  HIV infectious disease  4 Weeks       28        hiv</span>
+<span class="go">S00003    B cell  P3_4 Weeks  1459  HIV infectious disease  4 Weeks       28        hiv</span>
+<span class="go">S00004    B cell  P3_4 Weeks  1402  HIV infectious disease  4 Weeks       28        hiv</span>
+<span class="go">S00005    B cell  P3_4 Weeks  1179  HIV infectious disease  4 Weeks       28        hiv</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>It is recommended to do the feature selection. The reason for feature selection is to investigate the most interesting genes and to reduce running time.
+&gt;&gt;&gt; # select highly variable genes</p>
+<blockquote>
+<div><dl>
+<dt>def select_variable_genes(data, n_top_genes):</dt><dd><p># normalize raw data
+sc.pp.filter_genes(data, min_cells = 200)
+sc.pp.normalize_total(data, target_sum=1e4)
+sc.pp.log1p(data)
+# select top variable genes
+sc.pp.highly_variable_genes(data, n_top_genes = n_top_genes)
+high_var_genes = data.var_names[data.var.highly_variable]</p>
+<p>return high_var_genes</p>
+</dd>
+</dl>
+<p>high_var_genes = select_variable_genes(adata.copy(), n_top_genes = 1200)
+adata = adata[:, high_var_genes].copy()</p>
+</div></blockquote>
+<p>Then we set up the CellDrift object, which is a basic format with necessary information for downsteam analysis.
+.. code-block:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span> <span class="o">=</span> <span class="n">ct</span><span class="o">.</span><span class="n">setup_celldrift</span><span class="p">(</span>
+    <span class="n">adata</span><span class="p">,</span>
+    <span class="n">cell_type_key</span> <span class="o">=</span> <span class="n">kc</span><span class="p">,</span>
+    <span class="n">perturb_key</span> <span class="o">=</span> <span class="n">kp</span><span class="p">,</span>
+    <span class="n">time_key</span> <span class="o">=</span> <span class="n">kt</span><span class="p">,</span> <span class="c1"># the name of time covariate. Must be numeric</span>
+    <span class="n">control_name</span> <span class="o">=</span> <span class="s1">&#39;ctrl&#39;</span><span class="p">,</span>
+    <span class="n">perturb_name</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">size_factor_key</span> <span class="o">=</span> <span class="s1">&#39;nUMI&#39;</span><span class="p">,</span>
+    <span class="n">batch_key</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">n_reps</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="n">n_cells_perBlock</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="n">use_pseudotime</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">min_cells_perGene</span> <span class="o">=</span> <span class="mi">200</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>After we get the CellDrift object in a required format, we run the generalized linear model across input time points.
+.. code-block:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span> <span class="o">=</span> <span class="n">ct</span><span class="o">.</span><span class="n">model_timescale</span><span class="p">(</span>
+    <span class="n">adata</span><span class="p">,</span>
+    <span class="n">n_processes</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span> <span class="c1"># number of processes for multiprocessing</span>
+    <span class="n">chunksize</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="c1"># number of genes in each chunk</span>
+    <span class="n">pairwise_contrast_only</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">adjust_batch</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>The output of generalized linear model is stored in the folder <code class="docutils literal notranslate"><span class="pre">Coefficients_CellDrift</span></code></p>
+<p>We load the contrast coefficients (z scores) from the last step and then build up a <code class="docutils literal notranslate"><span class="pre">FDA</span></code> object.
+.. code-block:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># load data</span>
+<span class="n">df_zscore</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;Temporal_CellDrift/Contrast_Coefficients_combined_zscores_.txt&#39;</span><span class="p">,</span> <span class="n">sep</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">index_col</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">df_meta</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;Temporal_CellDrift/Contrast_Coefficients_combined_metadata_.txt&#39;</span><span class="p">,</span> <span class="n">sep</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">index_col</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># re-annotate discrete time points into continuous time points</span>
+<span class="n">time_origin</span> <span class="o">=</span> <span class="p">[</span><span class="mi">180</span><span class="p">,</span> <span class="mi">365</span><span class="p">,</span>  <span class="mi">28</span><span class="p">,</span>  <span class="mi">21</span><span class="p">,</span>   <span class="mi">1</span><span class="p">,</span>  <span class="mi">14</span><span class="p">,</span>   <span class="mi">7</span><span class="p">]</span>
+<span class="n">time_new</span> <span class="o">=</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="n">time_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">time_origin</span><span class="p">,</span> <span class="n">time_new</span><span class="p">))</span>
+<span class="n">df_meta</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">time_dict</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">df_meta</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]]</span>
+
+<span class="c1"># create object</span>
+<span class="n">cell_type</span> <span class="o">=</span> <span class="s1">&#39;monocyte&#39;</span>
+<span class="n">perturbations</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;hiv&#39;</span><span class="p">]</span>
+<span class="n">perturbation</span> <span class="o">=</span> <span class="s1">&#39;hiv&#39;</span>
+<span class="n">fda</span> <span class="o">=</span> <span class="n">ct</span><span class="o">.</span><span class="n">FDA</span><span class="p">(</span><span class="n">df_zscore</span><span class="p">,</span> <span class="n">df_meta</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We then do the temporal clustering on the <code class="docutils literal notranslate"><span class="pre">FDA</span></code> object.
+.. code-block:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># find clusters</span>
+<span class="n">input_genes</span> <span class="o">=</span> <span class="n">df_zscore</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span>
+<span class="n">fd1</span><span class="p">,</span> <span class="n">genes</span> <span class="o">=</span> <span class="n">fda</span><span class="o">.</span><span class="n">create_fd_genes</span><span class="p">(</span><span class="n">input_genes</span><span class="p">,</span> <span class="n">cell_type</span> <span class="o">=</span> <span class="n">cell_type</span><span class="p">,</span> <span class="n">perturbation</span> <span class="o">=</span> <span class="n">perturbation</span><span class="p">)</span>
+<span class="n">df_cluster</span> <span class="o">=</span> <span class="n">ct</span><span class="o">.</span><span class="n">fda_cluster</span><span class="p">(</span><span class="n">fd1</span><span class="p">,</span> <span class="n">genes</span><span class="p">,</span> <span class="n">n_clusters</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span> <span class="n">seed</span> <span class="o">=</span> <span class="mi">42</span><span class="p">,</span> <span class="n">output_folder</span> <span class="o">=</span> <span class="s1">&#39;Temporal_CellDrift/&#39;</span><span class="p">)</span>
+
+<span class="c1"># visualize clusters</span>
+<span class="n">ct</span><span class="o">.</span><span class="n">draw_smoothing_clusters</span><span class="p">(</span><span class="n">fd1</span><span class="p">,</span> <span class="n">df_cluster</span><span class="p">,</span> <span class="n">n_neighbors</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">bandwidth</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                        <span class="n">cluster_key</span> <span class="o">=</span> <span class="s1">&#39;clusters_fuzzy&#39;</span><span class="p">,</span> <span class="n">output_folder</span> <span class="o">=</span> <span class="s1">&#39;Temporal_CellDrift/cluster_fuzzy/&#39;</span><span class="p">)</span>
+
+<span class="n">ct</span><span class="o">.</span><span class="n">draw_smoothing_clusters</span><span class="p">(</span><span class="n">fd1</span><span class="p">,</span> <span class="n">df_cluster</span><span class="p">,</span> <span class="n">n_neighbors</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">bandwidth</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                        <span class="n">cluster_key</span> <span class="o">=</span> <span class="s1">&#39;clusters_kmeans&#39;</span><span class="p">,</span> <span class="n">output_folder</span> <span class="o">=</span> <span class="s1">&#39;Temporal_CellDrift/cluster_kmeans/&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="install.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="apis.html" class="btn btn-neutral float-right" title="API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Kang Jin.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
