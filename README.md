@@ -1,14 +1,14 @@
 [![Documentation Status](https://readthedocs.org/projects/celldrift/badge/?version=latest)](https://celldrift.readthedocs.io/en/latest/index.html) [![Pypi](https://img.shields.io/pypi/v/CellDrift?logo=PyPI)](https://pypi.org/project/CellDrift/)  [![Stars](https://img.shields.io/github/stars/KANG-BIOINFO/CellDrift)](https://github.com/KANG-BIOINFO/CellDrift/stargazers)
 
 # CellDrift
-CellDrift: temporal perturbation effects for single cell data
+[CellDrift: temporal perturbation effects for single cell data](https://academic.oup.com/bib/advance-article/doi/10.1093/bib/bbac324/6673850)
 
 Perturbation effects on gene programs are commonly investigated in single-cell experiments. Existing models measure perturbation responses independently across time series, disregarding the temporal consistency of specific gene programs. We introduce CellDrift, a generalized linear model based functional data analysis approach to investigate temporal gene patterns in response to perturbations. 
 ![overview](Examples/overview.png)
 
 ### Reference
 ```
-![Jin, K., Schnell, D., Li, G., Salomonis, N., Prasath, S., Szczesniak, R., & Aronow, B. J. (2022). CellDrift: Inferring Perturbation Responses in Temporally-Sampled Single Cell Data. Briefings in Bioinformatics (2022): bbac324.](https://academic.oup.com/bib/advance-article/doi/10.1093/bib/bbac324/6673850)
+Jin, K., Schnell, D., Li, G., Salomonis, N., Prasath, S., Szczesniak, R., & Aronow, B. J. (2022). CellDrift: Inferring Perturbation Responses in Temporally-Sampled Single Cell Data. Briefings in Bioinformatics (2022): bbac324.
 ```
 
 ### Prerequisite
