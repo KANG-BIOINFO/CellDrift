@@ -8,7 +8,7 @@ Perturbation effects on gene programs are commonly investigated in single-cell e
 
 ### Reference
 ```
-CellDrift: Inferring Perturbation Responses in Temporally-Sampled Single Cell Data. BioRxiv. Apr 2022 (https://www.biorxiv.org/content/10.1101/2022.04.13.488194v1)
+![Jin, K., Schnell, D., Li, G., Salomonis, N., Prasath, S., Szczesniak, R., & Aronow, B. J. (2022). CellDrift: Inferring Perturbation Responses in Temporally-Sampled Single Cell Data. Briefings in Bioinformatics (2022): bbac324.](https://academic.oup.com/bib/advance-article/doi/10.1093/bib/bbac324/6673850)
 ```
 
 ### Prerequisite
