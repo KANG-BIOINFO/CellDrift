@@ -13,7 +13,7 @@ from skfda.inference.hotelling import hotelling_t2
 from skfda.representation import FDataGrid, FDataBasis
 from skfda.ml.clustering import FuzzyCMeans, KMeans
 # from skfda.preprocessing.smoothing import KernelSmoother
-from skfda.preprocessing.smoothing.KernelSmoother import KNeighborsSmoother, NadarayaWatsonSmoother, LocalLinearRegressionSmoother
+from skfda.preprocessing.smoothing.kernel_smoothers import KNeighborsSmoother, NadarayaWatsonSmoother, LocalLinearRegressionSmoother
 from skfda.preprocessing.dim_reduction.feature_extraction import FPCA
 
 from statsmodels.stats.multitest import fdrcorrection
