@@ -7,12 +7,13 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 import skfda
-import skfda.misc.hat_matrix as hm
+# import skfda.misc.hat_matrix as hm
 from skfda.inference.anova import oneway_anova
 from skfda.inference.hotelling import hotelling_t2
 from skfda.representation import FDataGrid, FDataBasis
 from skfda.ml.clustering import FuzzyCMeans, KMeans
-from skfda.preprocessing.smoothing import KernelSmoother
+# from skfda.preprocessing.smoothing import KernelSmoother
+from skfda.preprocessing.smoothing.KernelSmoother import KNeighborsSmoother, NadarayaWatsonSmoother, LocalLinearRegressionSmoother
 from skfda.preprocessing.dim_reduction.feature_extraction import FPCA
 
 from statsmodels.stats.multitest import fdrcorrection
@@ -320,11 +321,14 @@ def draw_smoothing(fd, method = 'nw', n_neighbors = 2, bandwidth = 1,
     '''
 
     if method == 'knn':
-        smoother = KernelSmoother(kernel_estimator=hm.KNeighborsHatMatrix(n_neighbors = n_neighbors))
+        # smoother = KernelSmoother(kernel_estimator=hm.KNeighborsHatMatrix(n_neighbors = n_neighbors))
+        smoother = KNeighborsSmoother(smoothing_parameter = 2)
     elif method == 'llr':
-        smoother = KernelSmoother(kernel_estimator=hm.LocalLinearRegressionHatMatrix(bandwidth = bandwidth))
+        # smoother = KernelSmoother(kernel_estimator=hm.LocalLinearRegressionHatMatrix(bandwidth = bandwidth))
+        smoother = LocalLinearRegressionSmoother(smoothing_parameter = 2)
     else:
-        smoother = KernelSmoother(kernel_estimator=hm.NadarayaWatsonHatMatrix(bandwidth = bandwidth))
+        # smoother = KernelSmoother(kernel_estimator=hm.NadarayaWatsonHatMatrix(bandwidth = bandwidth))
+        smoother = NadarayaWatsonSmoother(smoothing_parameter = 2)
     
     smoother.fit(fd)
     fd_smoothed = smoother.transform(fd)
@@ -383,17 +387,20 @@ def draw_smoothing_clusters(fd_whole, df_cluster,
 
         # do smoothing
         # K-nearest neighbours kernel smoothing.
-        knn = KernelSmoother(kernel_estimator=hm.KNeighborsHatMatrix(n_neighbors = n_neighbors))
+        # knn = KernelSmoother(kernel_estimator=hm.KNeighborsHatMatrix(n_neighbors = n_neighbors))
+        knn = KNeighborsSmoother(smoothing_parameter = 2)
         knn.fit(fd)
         knn_fd = knn.transform(fd)
 
         # Local linear regression kernel smoothing.
-        llr = KernelSmoother(kernel_estimator=hm.LocalLinearRegressionHatMatrix(bandwidth = bandwidth))
+        # llr = KernelSmoother(kernel_estimator=hm.LocalLinearRegressionHatMatrix(bandwidth = bandwidth))
+        llr = llr(smoothing_parameter = 2)
         llr.fit(fd)
         llr_fd = llr.transform(fd)
 
         # # Nadaraya-Watson kernel smoothing.
-        nw = KernelSmoother(kernel_estimator=hm.NadarayaWatsonHatMatrix(bandwidth = bandwidth))
+        # nw = KernelSmoother(kernel_estimator=hm.NadarayaWatsonHatMatrix(bandwidth = bandwidth))
+        nw = NadarayaWatsonSmoother(smoothing_parameter = 2)
         nw.fit(fd)
         nw_fd = nw.transform(fd)
 

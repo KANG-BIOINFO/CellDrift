@@ -28,6 +28,7 @@ setup(
         'seaborn',
         'scipy',
         'statsmodels',
-        'dtw'
+        'dtw',
+        'scikit-fda==0.7.1'
     ],
 )
